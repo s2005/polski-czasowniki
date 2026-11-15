@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f6f3ee" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16130f" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Czasowniki">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<title>Czasowniki – тренажёр спряжения</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f3ee; --card:#fffdf9; --ink:#1f1c19; --muted:#6f675e; --line:#e4ddd3;
+  --accent:#c8102e; --accent-soft:#fbe8eb; --ok:#1f7a4d; --ok-soft:#e3f3ea;
+  --warn:#a15c00; --warn-soft:#fdf0dc; --bad:#b3261e; --bad-soft:#fbe6e4;
+  --chip:#efe9e0; --radius:14px;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#16130f; --card:#211d18; --ink:#f1ece4; --muted:#a79e92; --line:#3a332b;
+    --accent:#ff5a6e; --accent-soft:#3a1c22; --ok:#5cc98f; --ok-soft:#173326;
+    --warn:#f0b25a; --warn-soft:#3a2b14; --bad:#ff7b72; --bad-soft:#3b1d1b; --chip:#2c2620;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%}
+.wrap{max-width:720px;margin:0 auto;padding:16px 14px 32px}
+body.has-kbd .wrap{padding-bottom:110px}
+header h1{font-family:Fraunces,Georgia,serif;font-size:1.7rem;margin:6px 0 2px;letter-spacing:-.01em}
+header p{margin:0;color:var(--muted);font-size:.92rem}
+nav{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0 8px;margin:10px 0 6px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav a{flex:0 0 auto;text-decoration:none;color:var(--ink);background:var(--chip);padding:9px 14px;border-radius:999px;font-weight:600;font-size:.92rem;white-space:nowrap}
+nav a.on{background:var(--ink);color:var(--bg)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 16px;margin:12px 0}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 13px;font:600 .88rem Inter,sans-serif;cursor:pointer}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.label{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin:0 0 6px}
+.btn{border:0;border-radius:12px;padding:13px 18px;font:600 1rem Inter,sans-serif;cursor:pointer;background:var(--chip);color:var(--ink);min-height:48px}
+.btn.primary{background:var(--accent);color:#fff}
+.btn.ghost{background:transparent;border:1px solid var(--line)}
+.btn:disabled{opacity:.45}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.actions .btn.primary{flex:1 1 160px}
+.score{font-size:.9rem;color:var(--muted)}
+.score b{color:var(--ink)}
+.prompt{font-family:Fraunces,Georgia,serif;font-size:2rem;font-weight:700;margin:4px 0 0;line-height:1.2}
+.prompt .pron{color:var(--accent)}
+.sub{color:var(--muted);margin:2px 0 14px}
+input.ans{width:100%;font:500 1.25rem Inter,sans-serif;padding:13px 14px;border-radius:12px;border:2px solid var(--line);background:var(--bg);color:var(--ink);outline:none}
+input.ans:focus{border-color:var(--ink)}
+input.ans.ok{border-color:var(--ok);background:var(--ok-soft)}
+input.ans.diac{border-color:var(--warn);background:var(--warn-soft)}
+input.ans.bad{border-color:var(--bad);background:var(--bad-soft)}
+.sentence{font-size:1.2rem;line-height:2.4}
+.sentence input.ans{display:inline-block;width:9.5em;font-size:1.1rem;padding:6px 10px;margin:0 2px;vertical-align:middle}
+.verb-tag{display:inline-block;background:var(--chip);border-radius:8px;padding:1px 8px;font-size:.95rem;color:var(--muted)}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.choices button{font:600 1.15rem Inter,sans-serif;padding:15px 8px;border-radius:12px;border:2px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.choices button.ok{border-color:var(--ok);background:var(--ok-soft)}
+.choices button.bad{border-color:var(--bad);background:var(--bad-soft)}
+.fb{margin-top:14px;padding:12px 14px;border-radius:12px;font-size:.97rem}
+.fb.ok{background:var(--ok-soft);color:var(--ok)}
+.fb.diac{background:var(--warn-soft);color:var(--warn)}
+.fb.bad{background:var(--bad-soft);color:var(--bad)}
+.fb.hint{background:var(--chip);color:var(--ink)}
+.fb b{font-weight:700}
+.fb .ink{color:var(--ink)}
+table.conj{border-collapse:collapse;width:100%;margin-top:10px;font-size:.98rem}
+table.conj td{padding:6px 8px;border-top:1px solid var(--line)}
+table.conj td:first-child{color:var(--muted);width:38%}
+table.conj tr.target td{background:var(--accent-soft);font-weight:700}
+table.conj tr.target td:first-child{color:var(--ink)}
+table.conj tr.yours td{text-decoration:line-through;text-decoration-color:var(--bad)}
+.end{color:var(--accent);font-weight:700}
+.kbd{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--card);border-top:1px solid var(--line);padding:8px 8px calc(8px + env(safe-area-inset-bottom));display:flex;justify-content:center;gap:5px}
+.kbd button{flex:1 1 0;max-width:52px;min-height:44px;font:600 1.15rem Inter,sans-serif;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;padding:0}
+.kbd.hide{display:none}
+select{font:500 1rem Inter,sans-serif;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);max-width:100%;flex:1 1 200px}
+.grid6{display:grid;grid-template-columns:auto 1fr;gap:8px 10px;align-items:center;margin-top:12px}
+.grid6 .p{color:var(--muted);font-weight:600}
+.grid6 .fix{grid-column:2;font-size:.9rem;color:var(--bad);margin-top:-4px}
+.grid6 input.ans{font-size:1.1rem;padding:10px 12px}
+.progress{height:6px;background:var(--chip);border-radius:9px;overflow:hidden;margin:4px 0 14px}
+.progress i{display:block;height:100%;background:var(--accent);transition:width .25s}
+h2{font-family:Fraunces,Georgia,serif;font-size:1.25rem;margin:0 0 6px}
+h3{font-size:1rem;margin:0 0 4px}
+details{border-top:1px solid var(--line);padding:8px 0}
+details summary{cursor:pointer;font-weight:600;list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary span{color:var(--muted);font-weight:400}
+.ends{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}
+.ends div{background:var(--chip);border-radius:10px;padding:7px 8px;font-size:.88rem}
+.ends div small{display:block;color:var(--muted);font-size:.75rem}
+.muted{color:var(--muted)}
+.list{margin:0;padding-left:18px}
+.list li{margin:3px 0}
+.empty{color:var(--muted);text-align:center;padding:18px 0}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Czasowniki w czasie teraźniejszym</h1>
+</header>
+<nav id="nav">
+  <a href="#zdania" data-v="zdania">Предложения</a>
+  <a href="#formy" data-v="formy">Формы</a>
+  <a href="#tabela" data-v="tabela">Таблица</a>
+  <a href="#bledy" data-v="bledy">Ошибки <span id="errCount"></span></a>
+  <a href="#sciaga" data-v="sciaga">Шпаргалка</a>
+</nav>
+
+<!-- ============ ZDANIA ============ -->
+<section id="v-zdania" class="view">
+  <div class="card">
+    <p class="label">Набор</p>
+    <div class="chips" id="setChips"></div>
+  </div>
+  <div class="card" id="sCard">
+    <div class="row" style="justify-content:space-between"><span class="score" id="sPos"></span><span class="score" id="sScore"></span></div>
+    <div class="progress"><i id="sBar"></i></div>
+    <div class="sentence" id="sText"></div>
+    <div id="sFb"></div>
+    <div class="actions">
+      <button class="btn primary" id="sMain">Проверить</button>
+      <button class="btn ghost" id="sHint">Подсказка</button>
+      <button class="btn ghost" id="sShow">Ответ</button>
+      <button class="btn ghost hidden" id="sSkip">Дальше →</button>
+    </div>
+  </div>
+  <div class="card hidden" id="sDone"></div>
+</section>
+
+<!-- ============ FORMY ============ -->
+<section id="v-formy" class="view">
+  <div class="card">
+    <p class="label">Группы глаголов</p>
+    <div class="chips" id="grpChips"></div>
+    <p class="label" style="margin-top:14px">Режим</p>
+    <div class="chips" id="modeChips">
+      <button class="chip on" data-m="type">Ввод</button>
+      <button class="chip" data-m="choice">Выбор из 4</button>
+    </div>
+  </div>
+  <div class="card" id="dCard"></div>
+</section>
+
+<!-- ============ TABELA ============ -->
+<section id="v-tabela" class="view">
+  <div class="card">
+    <p class="label">Заполни все 6 форм</p>
+    <div class="row"><select id="tSel"></select><button class="btn ghost" id="tRand">Случайный</button></div>
+    <div id="tBody"></div>
+    <div class="actions"><button class="btn primary" id="tCheck">Проверить</button><button class="btn ghost" id="tNext">Следующий</button></div>
+  </div>
+</section>
+
+<!-- ============ BLEDY ============ -->
+<section id="v-bledy" class="view">
+  <div class="card" id="eCard"></div>
+  <div class="card" id="eList"></div>
+</section>
+
+<!-- ============ SCIAGA ============ -->
+<section id="v-sciaga" class="view"><div id="ref"></div></section>
+</div>
+
+<div class="kbd" id="kbd"></div>
+
+<script>
+/* ---------- данные ---------- */
+const P = ['ja','ty','on / ona','my','wy','oni / one'];
+const PV = [['ja'],['ty'],['on','ona','pan','pani'],['my'],['wy'],['oni','one']];
+const G = {
+  A:{name:'A · -ować', ends:['-uję','-ujesz','-uje','-ujemy','-ujecie','-ują'],
+     rule:'Убери <b>-ować</b>, добавь <b>-uj-</b> + окончания -ę, -esz, -e, -emy, -ecie, -ą. <i>pracować → pracuję</i>'},
+  B:{name:'B · -ać (-m, -sz)', ends:['-m','-sz','—','-my','-cie','-ją'],
+     rule:'Убери <b>-ć</b>, добавь -m, -sz, ничего, -my, -cie, -ją. <i>czytać → czytam, czytają</i>'},
+  C:{name:'C · -ić, -yć, -eć (-ę, -isz)', ends:['-ę / -ię','-isz / -ysz','-i / -y','-imy / -ymy','-icie / -ycie','-ą / -ią'],
+     rule:'Убери <b>-ić / -yć / -eć</b>. После cz, sz, rz, ż → -ę, <b>-ysz</b>, -y… (tańczę, tańczysz). После b, p, w, m, n → <b>-ię … -ią</b> (lubię, lubią). Чередования в ja и oni: chodzić → chodzę, prosić → proszę, płacić → płacę, jeździć → jeżdżę, musieć → muszę.'},
+  D:{name:'D · -ę, -esz', ends:['-ę','-esz','-e','-emy','-ecie','-ą'],
+     rule:'Основа меняется: pisać → <b>pisz-</b>, móc → mog-/moż-, brać → bior-/bierz-. Окончания -ę, -esz, -e, -emy, -ecie, -ą. Ловушка: <b>-awać → -aję</b> (dawać → daję, wstawać → wstaję).'},
+  S:{name:'Особые', ends:['-m','-sz','—','-my','-cie','-ją / -dzą'],
+     rule:'Запоминаются целиком. jeść и wiedzieć: oni <b>jedzą, wiedzą</b>; rozumieć и umieć: oni <b>rozumieją, umieją</b>.'}
+};
+const sie = inf => inf.endsWith(' się') ? ' się' : '';
+const A = (inf,ru,src) => ({inf,ru,g:'A',src,f:['uję','ujesz','uje','ujemy','ujecie','ują'].map(e=>inf.replace(/ować( się)?$/,'')+e+sie(inf))});
+const B = (inf,ru,src) => ({inf,ru,g:'B',src,f:['m','sz','','my','cie','ją'].map(e=>inf.replace(/ć( się)?$/,'')+e+sie(inf))});
+const M = (inf,ru,g,s,src) => ({inf,ru,g,src,f:s.split(',').map(x=>x.trim())});
+const VERBS = [
+  A('lądować','приземляться',1), A('parkować','парковать(ся)',1), A('studiować','учиться в вузе, изучать',1),
+  A('pracować','работать',1), A('surfować','сёрфить (в интернете)',1), A('mailować','писать e-mail',1),
+  A('interesować się','интересоваться',1), A('kupować','покупать'), A('gotować','готовить (еду)'),
+  A('malować','рисовать красками'), A('dziękować','благодарить'), A('podróżować','путешествовать'),
+  A('rysować','рисовать'), A('planować','планировать'), A('potrzebować','нуждаться'),
+
+  B('czytać','читать',1), B('pływać','плавать',1), B('słuchać','слушать',1), B('śpiewać','петь',1),
+  B('biegać','бегать',1), B('grać','играть',1), B('oglądać','смотреть',1), B('mieszkać','жить, проживать',1),
+  B('znać','знать (кого/что)',1), B('przepraszać','извиняться',1), B('pytać','спрашивать'), B('czekać','ждать'),
+  B('kochać','любить'), B('szukać','искать'), B('wracać','возвращаться'), B('pamiętać','помнить'),
+  B('zamykać','закрывать'), B('otwierać','открывать'), B('odpoczywać','отдыхать'), B('zwiedzać','осматривать (город)'),
+  B('nazywać się','называться'),
+
+  M('lubić','любить, нравиться','C','lubię, lubisz, lubi, lubimy, lubicie, lubią',1),
+  M('mówić','говорить','C','mówię, mówisz, mówi, mówimy, mówicie, mówią',1),
+  M('robić','делать','C','robię, robisz, robi, robimy, robicie, robią',1),
+  M('chodzić','ходить','C','chodzę, chodzisz, chodzi, chodzimy, chodzicie, chodzą',1),
+  M('uczyć się','учиться','C','uczę się, uczysz się, uczy się, uczymy się, uczycie się, uczą się',1),
+  M('tańczyć','танцевать','C','tańczę, tańczysz, tańczy, tańczymy, tańczycie, tańczą',1),
+  M('woleć','предпочитать','C','wolę, wolisz, woli, wolimy, wolicie, wolą',1),
+  M('myśleć','думать','C','myślę, myślisz, myśli, myślimy, myślicie, myślą'),
+  M('widzieć','видеть','C','widzę, widzisz, widzi, widzimy, widzicie, widzą'),
+  M('słyszeć','слышать','C','słyszę, słyszysz, słyszy, słyszymy, słyszycie, słyszą'),
+  M('musieć','быть должным','C','muszę, musisz, musi, musimy, musicie, muszą'),
+  M('płacić','платить','C','płacę, płacisz, płaci, płacimy, płacicie, płacą'),
+  M('prosić','просить','C','proszę, prosisz, prosi, prosimy, prosicie, proszą'),
+  M('kończyć','заканчивать','C','kończę, kończysz, kończy, kończymy, kończycie, kończą'),
+  M('dzwonić','звонить','C','dzwonię, dzwonisz, dzwoni, dzwonimy, dzwonicie, dzwonią'),
+  M('palić','курить','C','palę, palisz, pali, palimy, palicie, palą'),
+  M('jeździć','ездить','C','jeżdżę, jeździsz, jeździ, jeździmy, jeździcie, jeżdżą'),
+  M('wierzyć','верить','C','wierzę, wierzysz, wierzy, wierzymy, wierzycie, wierzą'),
+  M('spać','спать','C','śpię, śpisz, śpi, śpimy, śpicie, śpią'),
+  M('leżeć','лежать','C','leżę, leżysz, leży, leżymy, leżycie, leżą'),
+  M('siedzieć','сидеть','C','siedzę, siedzisz, siedzi, siedzimy, siedzicie, siedzą'),
+
+  M('pisać','писать','D','piszę, piszesz, pisze, piszemy, piszecie, piszą',1),
+  M('móc','мочь','D','mogę, możesz, może, możemy, możecie, mogą',1),
+  M('chcieć','хотеть','D','chcę, chcesz, chce, chcemy, chcecie, chcą',1),
+  M('iść','идти','D','idę, idziesz, idzie, idziemy, idziecie, idą'),
+  M('jechać','ехать','D','jadę, jedziesz, jedzie, jedziemy, jedziecie, jadą'),
+  M('brać','брать','D','biorę, bierzesz, bierze, bierzemy, bierzecie, biorą'),
+  M('pić','пить','D','piję, pijesz, pije, pijemy, pijecie, piją'),
+  M('myć','мыть','D','myję, myjesz, myje, myjemy, myjecie, myją'),
+  M('żyć','жить (существовать)','D','żyję, żyjesz, żyje, żyjemy, żyjecie, żyją'),
+  M('dawać','давать','D','daję, dajesz, daje, dajemy, dajecie, dają'),
+  M('wstawać','вставать','D','wstaję, wstajesz, wstaje, wstajemy, wstajecie, wstają'),
+  M('sprzedawać','продавать','D','sprzedaję, sprzedajesz, sprzedaje, sprzedajemy, sprzedajecie, sprzedają'),
+
+  M('być','быть','S','jestem, jesteś, jest, jesteśmy, jesteście, są',1),
+  M('mieć','иметь','S','mam, masz, ma, mamy, macie, mają',1),
+  M('jeść','есть, кушать','S','jem, jesz, je, jemy, jecie, jedzą',1),
+  M('wiedzieć','знать (факт)','S','wiem, wiesz, wie, wiemy, wiecie, wiedzą',1),
+  M('rozumieć','понимать','S','rozumiem, rozumiesz, rozumie, rozumiemy, rozumiecie, rozumieją',1),
+  M('umieć','уметь','S','umiem, umiesz, umie, umiemy, umiecie, umieją'),
+];
+const V = Object.fromEntries(VERBS.map(v=>[v.inf,v]));
+
+const SETS = [
+ {id:'7A',t:'7 · A',items:[
+  ['Dwa samoloty ___ .','lądować','lądują'],['Marek ___ samochód.','parkować','parkuje'],
+  ['Dwa samochody ___ .','parkować','parkują'],['Co (ty) ___ ?','studiować','studiujesz'],
+  ['Czym ona ___ ?','interesować się','interesuje się'],['Gdzie (wy) ___ ?','pracować','pracujecie'],
+  ['(my) ___ w Bytomiu.','pracować','pracujemy'],['Codziennie (my) ___ w internecie.','surfować','surfujemy'],
+  ['Maria rzadko ___ .','mailować','mailuje'],['(ja) ___ historią.','interesować się','interesuję się']]},
+ {id:'7B',t:'7 · B',items:[
+  ['(ja) ___ interesującą książkę.','czytać','czytam'],['Jak często (ty) ___ w restauracji?','jeść','jesz'],
+  ['On ___ .','pływać','pływa'],['(my) ___ muzyki.','słuchać','słuchamy'],
+  ['One pięknie ___ .','śpiewać','śpiewają'],['Czy (wy) ___ ?','biegać','biegacie'],
+  ['Oni ___ w tenisa.','grać','grają'],['Czy (ty) ___ na gitarze?','grać','grasz'],
+  ['Czy (wy) ___ w piłkę nożną?','grać','gracie'],['Jak często (ty) ___ telewizję?','oglądać','oglądasz']]},
+ {id:'7C',t:'7 · C',items:[
+  ['Czy (ty) ___ chodzić do kina?','lubić','lubisz'],['(ja) ___ słabo po polsku.','mówić','mówię'],
+  ['Czy (wy) ___ po rosyjsku?','mówić','mówicie'],['Oni ___ pływać.','lubić','lubią'],
+  ['Jak często (wy) ___ do kina?','chodzić','chodzicie'],['Dlaczego (ty) ___ języka polskiego?','uczyć się','uczysz się'],
+  ['Co oni ___ codziennie?','robić','robią'],['Co (ty) ___ w weekend?','robić','robisz'],
+  ['Czy one dobrze ___ ?','tańczyć','tańczą'],['Oni ___ chodzić do kina.','lubić','lubią']]},
+ {id:'7D',t:'7 · D',items:[
+  ['Dziennikarz ___ artykuł.','pisać','pisze'],['Czy (ty) często ___ e-maile?','pisać','piszesz'],
+  ['Czy (ja) ___ prosić o uwagę?','móc','mogę'],['Czy ___ pan mówić wolniej?','móc','może'],
+  ['Co (ty) ___ robić dzisiaj wieczorem?','chcieć','chcesz'],['Marta ___ pracować w Polsce.','chcieć','chce'],
+  ['Anna i Dorota są dziennikarkami i ___ do „Gazety Wyborczej”.','pisać','piszą'],['One ___ mieszkać w Polsce.','chcieć','chcą'],
+  ['Czy (wy) ___ powtórzyć, jaki macie numer telefonu?','móc','możecie'],['W poniedziałek (ja) ___ test z polskiego.','pisać','piszę']]},
+ {id:'8A',t:'8 · A',items:[
+  ['(ja) ___ artykuł.','pisać','piszę'],['One ___ regularnie na kurs francuskiego.','chodzić','chodzą'],
+  ['Czy pan ___ pracować we Wrocławiu?','chcieć','chce'],['Czy (wy) ___ sport?','lubić','lubicie'],
+  ['(ty) ___ problem?','mieć','masz'],['Czy pani ___ po niemiecku?','mówić','mówi'],
+  ['Uczeń ___ do szkoły.','chodzić','chodzi'],['Oni świetnie ___ sambę.','tańczyć','tańczą'],
+  ['Czy (ty) ___ w Krakowie?','studiować','studiujesz'],['Gdzie (ty) ___ ?','mieszkać','mieszkasz'],
+  ['(ja) ___ języka polskiego.','uczyć się','uczę się'],['Czy (wy) ___ na kurs polskiego?','chodzić','chodzicie'],
+  ['Oni świetnie ___ po polsku.','mówić','mówią'],['On ___ książkę.','pisać','pisze'],
+  ['Anna ___ europeistykę.','studiować','studiuje']]},
+ {id:'8B',t:'8 · B',items:[
+  ['Oni ___ na dyskotece.','tańczyć','tańczą'],['(my) ___ duży dom.','mieć','mamy'],
+  ['Czy Paweł ___ w Warszawie?','pracować','pracuje'],['Teraz (ja) nie ___ słuchać muzyki.','chcieć','chcę'],
+  ['Czy (wy) ___ literaturą?','interesować się','interesujecie się'],['Czy pan ___ mówić trochę wolniej?','móc','może'],
+  ['Oni ___ w pokoju.','być','są'],['Czy (wy) ___ po angielsku?','czytać','czytacie'],
+  ['Czy (ty) ___ języka polskiego?','uczyć się','uczysz się'],['Wojtek i Ania ___ zadanie domowe.','robić','robią'],
+  ['Czy (ty) ___ dobrze język polski?','znać','znasz'],['(oni) ___ , że to jest bez sensu.','wiedzieć','wiedzą'],
+  ['(ja) ___ , ale nie ___ .','przepraszać / rozumieć','przepraszam / rozumiem'],['Czy (ty) ___ mówić wolniej?','móc','możesz'],
+  ['(ja) ___ studiować ekonomię.','chcieć','chcę']]},
+ {id:'N',t:'Новые глаголы',items:[
+  ['(ja) ___ kawę w kawiarni.','pić','piję'],['Dokąd (ty) ___ ?','iść','idziesz'],
+  ['Oni ___ do pracy autobusem.','jeździć','jeżdżą'],['(my) ___ obiad w domu.','gotować','gotujemy'],
+  ['Czy (wy) ___ na mnie?','czekać','czekacie'],['Ona ___ mieszkania w Warszawie.','szukać','szuka'],
+  ['(ja) ___ pracować w sobotę.','musieć','muszę'],['Czy (ty) ___ ten dom?','widzieć','widzisz'],
+  ['Co (wy) ___ o tym?','myśleć','myślicie'],['(ja) ___ do mamy w niedzielę.','dzwonić','dzwonię'],
+  ['Oni ___ chleb w sklepie.','kupować','kupują'],['Ile (my) ___ za bilet?','płacić','płacimy'],
+  ['Dziecko ___ do dziesiątej.','spać','śpi'],['(ja) ___ o pomoc.','prosić','proszę'],
+  ['Czy (ty) ___ grać na gitarze?','umieć','umiesz'],['One ___ do domu o piątej.','wracać','wracają'],
+  ['(my) ___ pociągiem do Krakowa.','jechać','jedziemy'],['Czy pan ___ papierosy?','palić','pali'],
+  ['(ja) ___ za pomoc.','dziękować','dziękuję'],['(ja) ___ taksówkę.','brać','biorę'],
+  ['O której (wy) ___ ?','wstawać','wstajecie'],['(ja) nie ___ , gdzie on mieszka.','wiedzieć','wiem']]},
+];
+
+/* ---------- утилиты ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const norm = s => String(s).toLowerCase().replace(/[„”"«».,!?;:]/g,' ').replace(/\s+/g,' ').trim();
+const DM = {ą:'a',ć:'c',ę:'e',ł:'l',ń:'n',ó:'o',ś:'s',ź:'z',ż:'z'};
+const strip = s => s.replace(/[ąćęłńóśźż]/g,c=>DM[c]);
+const rnd = a => a[Math.floor(Math.random()*a.length)];
+const shuffle = a => {a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const store = {
+  get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+};
+
+/* ---------- ошибки ---------- */
+let MIST = store.get('plc-mist',{});
+function addMist(inf,p){const k=inf+'|'+p;MIST[k]=(MIST[k]||0)+1;store.set('plc-mist',MIST);updErr()}
+function okMist(inf,p){const k=inf+'|'+p;if(MIST[k]){MIST[k]--;if(MIST[k]<=0)delete MIST[k];store.set('plc-mist',MIST);updErr()}}
+function updErr(){const n=Object.keys(MIST).length;$('#errCount').textContent=n?'· '+n:''}
+
+/* ---------- проверка ---------- */
+function judge(user, verb, p){
+  const u=norm(user), c=norm(verb.f[p]);
+  if(!u) return {r:'empty'};
+  if(u===c) return {r:'ok'};
+  if(strip(u)===strip(c)) return {r:'diac'};
+  if(sie(verb.inf) && u+' się'===c) return {r:'sie'};
+  let idx=verb.f.findIndex(f=>norm(f)===u);
+  if(idx<0) idx=verb.f.findIndex(f=>strip(norm(f))===strip(u));
+  if(idx>=0 && idx!==p) return {r:'person',idx};
+  return {r:'bad'};
+}
+function conjTable(verb,p,yours){
+  return '<table class="conj">'+verb.f.map((f,i)=>`<tr class="${i===p?'target':''}${i===yours&&i!==p?' yours':''}"><td>${P[i]}</td><td>${esc(f)}</td></tr>`).join('')+'</table>';
+}
+function hintHTML(verb,p){
+  const g=G[verb.g];
+  return `<div class="fb hint"><b>Лицо:</b> ${P[p]}${p===2?' (pan/pani → как on/ona)':''}<br><b>Группа ${esc(g.name)}</b> — для «${P[p]}» окончание <span class="end">${g.ends[p]}</span><br><span class="muted">${g.rule}</span></div>`;
+}
+function fbHTML(res,verb,p,user){
+  const right=`<b class="ink">${esc(verb.f[p])}</b>`;
+  const tbl=conjTable(verb,p,res.idx);
+  const grp=`<div class="muted" style="margin-top:6px">${esc(G[verb.g].name)}: ${G[verb.g].ends.join(', ')}</div>`;
+  switch(res.r){
+    case 'ok': return `<div class="fb ok">✓ Dobrze! ${right}</div>`;
+    case 'diac': return `<div class="fb diac">Почти: проверь польские буквы. Правильно: ${right}${tbl}</div>`;
+    case 'sie': return `<div class="fb diac">Не забудь <b>się</b>: ${right}</div>`;
+    case 'person': return `<div class="fb bad">«${esc(user)}» — это форма для <b>${P[res.idx]}</b>. Нужна форма для <b>${P[p]}</b>: ${right}${tbl}${grp}</div>`;
+    case 'show': return `<div class="fb hint">Ответ: ${right}${tbl}${grp}</div>`;
+    default: return `<div class="fb bad">Неверно. Правильно: ${right}${tbl}${grp}</div>`;
+  }
+}
+const cls = r => r==='ok'?'ok':(r==='diac'||r==='sie')?'diac':'bad';
+
+/* ---------- польская клавиатура ---------- */
+let lastInput=null;
+$('#kbd').innerHTML='ąćęłńóśźż'.split('').map(c=>`<button type="button" data-c="${c}">${c}</button>`).join('');
+document.addEventListener('focusin',e=>{if(e.target.matches('input.ans'))lastInput=e.target});
+$('#kbd').addEventListener('pointerdown',e=>{
+  const b=e.target.closest('button');if(!b)return;e.preventDefault();
+  const el=lastInput&&document.body.contains(lastInput)?lastInput:document.querySelector('.view:not(.hidden) input.ans:not([readonly])');
+  if(!el||el.readOnly)return;
+  const s=el.selectionStart??el.value.length,en=el.selectionEnd??el.value.length;
+  el.value=el.value.slice(0,s)+b.dataset.c+el.value.slice(en);
+  el.focus();el.setSelectionRange(s+1,s+1);
+});
+
+/* ---------- ПРЕДЛОЖЕНИЯ ---------- */
+const S={set:null,queue:[],i:0,ok:0,done:0,checked:false};
+function setChips(){
+  const all=[...SETS.map(s=>`<button class="chip" data-s="${s.id}">${esc(s.t)}</button>`),`<button class="chip" data-s="MIX">Всё вперемешку</button>`];
+  $('#setChips').innerHTML=all.join('');
+  $('#setChips').onclick=e=>{const b=e.target.closest('.chip');if(b)startSet(b.dataset.s)};
+}
+function startSet(id){
+  let items;
+  if(id==='MIX') items=shuffle(SETS.flatMap(s=>s.items.map((it,k)=>({it,lab:s.t+' · '+(k+1)}))));
+  else {const s=SETS.find(x=>x.id===id);items=s.items.map((it,k)=>({it,lab:s.t+' · '+(k+1)}))}
+  Object.assign(S,{set:id,queue:items,i:0,ok:0,done:0,wrong:[]});
+  store.set('plc-set',id);
+  document.querySelectorAll('#setChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.s===id));
+  $('#sDone').classList.add('hidden');$('#sCard').classList.remove('hidden');
+  renderS();
+}
+function curS(){
+  const [t,vs,as]=S.queue[S.i].it;
+  const verbs=vs.split(' / ').map(x=>V[x]), ans=as.split(' / ');
+  const ps=ans.map((a,k)=>verbs[k].f.indexOf(a));
+  return {t,vs,verbs,ans,ps};
+}
+function renderS(){
+  const c=curS();S.checked=false;S.solved=false;$('#sSkip').classList.add('hidden');
+  let k=0;
+  const html=esc(c.t).split('___').map((part,i,arr)=>part+(i<arr.length-1?`<input class="ans" data-k="${k++}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done">`:'')).join('');
+  $('#sText').innerHTML=html+` <span class="verb-tag">${esc(c.vs)}</span>`;
+  $('#sPos').textContent=S.queue[S.i].lab+'  ('+(S.i+1)+' / '+S.queue.length+')';
+  $('#sScore').innerHTML=`верно: <b>${S.ok}</b> / ${S.done}`;
+  $('#sBar').style.width=(S.i/S.queue.length*100)+'%';
+  $('#sFb').innerHTML='';$('#sMain').textContent='Проверить';
+  $('#sHint').classList.remove('hidden');$('#sShow').classList.remove('hidden');
+  const first=$('#sText input');if(first&&matchMedia('(hover:hover)').matches)first.focus();
+  $('#sText').querySelectorAll('input').forEach(inp=>inp.addEventListener('keydown',e=>{
+    if(e.key!=='Enter')return;e.preventDefault();
+    const ins=[...$('#sText').querySelectorAll('input')];const ix=ins.indexOf(inp);
+    const nx=ins.slice(ix+1).find(i=>!i.readOnly&&!i.value);if(!S.solved&&nx){nx.focus();return}
+    sMain();
+  }));
+}
+function checkS(show){
+  const c=curS(),ins=[...$('#sText').querySelectorAll('input')];
+  const first=!S.checked;let allOk=true,firstOk=!show,fb='';
+  ins.forEach((inp,k)=>{
+    const v=c.verbs[k],p=c.ps[k];
+    if(inp.readOnly){if(inp.classList.contains('ok'))fb+=`<div class="fb ok">✓ <b>${esc(v.f[p])}</b></div>`;return}
+    let res=show?{r:'show'}:judge(inp.value,v,p);
+    if(res.r==='empty')res={r:'bad'};
+    if(show)inp.value=v.f[p];
+    const good=res.r==='ok';
+    inp.classList.remove('ok','bad','diac');inp.classList.add(show?'diac':cls(res.r));
+    if(good||show)inp.readOnly=true;else allOk=false;
+    if(!good)firstOk=false;
+    if(first){if(good)okMist(v.inf,p);else addMist(v.inf,p)}
+    fb+=(!first&&good)?`<div class="fb ok">✓ Теперь верно: <b>${esc(v.f[p])}</b></div>`:fbHTML(res,v,p,inp.value);
+  });
+  if(first){S.checked=true;S.done++;if(firstOk)S.ok++;else S.wrong.push(S.queue[S.i])}
+  S.solved=allOk;
+  $('#sFb').innerHTML=fb;
+  $('#sHint').classList.add('hidden');$('#sShow').classList.add('hidden');
+  const last=S.i>=S.queue.length-1;
+  $('#sMain').textContent=S.solved?(last?'Итог':'Дальше →'):'Проверить ещё раз';
+  $('#sSkip').textContent=last?'Итог':'Дальше →';
+  $('#sSkip').classList.toggle('hidden',S.solved);
+  $('#sScore').innerHTML=`верно: <b>${S.ok}</b> / ${S.done}`;
+  if(!S.solved){const i=ins.find(x=>!x.readOnly);i.focus();i.select()}
+}
+function nextS(){if(S.i<S.queue.length-1){S.i++;renderS()}else doneS()}
+function sMain(){
+  if(S.solved){nextS();return}
+  const ins=[...$('#sText').querySelectorAll('input')].filter(i=>!i.readOnly);
+  if(ins.every(i=>!i.value.trim())){ins[0].focus();return}
+  checkS(false);
+}
+function doneS(){
+  $('#sCard').classList.add('hidden');
+  const pct=Math.round(S.ok/S.queue.length*100);
+  $('#sDone').classList.remove('hidden');
+  $('#sDone').innerHTML=`<h2>Итог: ${S.ok} / ${S.queue.length} (${pct}%)</h2>`+
+   (S.wrong.length?`<p class="muted">Ошибки:</p><ul class="list">${S.wrong.map(w=>{const [t,,a]=w.it;let k=0;const as=a.split(' / ');return `<li>${esc(t).split('___').map((x,i,arr)=>x+(i<arr.length-1?`<b>${esc(as[k++])}</b>`:'')).join('')}</li>`}).join('')}</ul>`:'<p>Bez błędów — świetnie!</p>')+
+   `<div class="actions">${S.wrong.length?'<button class="btn primary" id="sRetry">Повторить ошибки</button>':''}<button class="btn ghost" id="sAgain">Заново</button></div>`;
+  const r=$('#sRetry');if(r)r.onclick=()=>{const w=S.wrong;Object.assign(S,{queue:shuffle(w),i:0,ok:0,done:0,wrong:[]});$('#sDone').classList.add('hidden');$('#sCard').classList.remove('hidden');renderS()};
+  $('#sAgain').onclick=()=>startSet(S.set);
+}
+$('#sMain').onclick=sMain;
+$('#sHint').onclick=()=>{const c=curS();$('#sFb').innerHTML=c.verbs.map((v,k)=>hintHTML(v,c.ps[k])).join('')};
+$('#sShow').onclick=()=>checkS(true);
+$('#sSkip').onclick=nextS;
+
+/* ---------- ФОРМЫ (drill) ---------- */
+const D={groups:store.get('plc-groups',['A','B','C','D','S']),mode:store.get('plc-mode','type'),ok:0,n:0,streak:0,cur:null,checked:false,source:'all'};
+function grpChips(){
+  $('#grpChips').innerHTML=Object.entries(G).map(([k,g])=>`<button class="chip ${D.groups.includes(k)?'on':''}" data-g="${k}">${esc(g.name.split(' (')[0])}</button>`).join('')+
+    `<button class="chip ${D.source==='src'?'on':''}" data-src="1">только из урока</button>`;
+}
+$('#grpChips').onclick=e=>{
+  const b=e.target.closest('.chip');if(!b)return;
+  if(b.dataset.src){D.source=D.source==='src'?'all':'src'}
+  else{const g=b.dataset.g;if(D.groups.includes(g)){if(D.groups.length>1)D.groups=D.groups.filter(x=>x!==g)}else D.groups.push(g);store.set('plc-groups',D.groups)}
+  grpChips();nextD();
+};
+$('#modeChips').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;D.mode=b.dataset.m;store.set('plc-mode',D.mode);
+  document.querySelectorAll('#modeChips .chip').forEach(c=>c.classList.toggle('on',c===b));renderD()};
+function pickD(){
+  const pool=VERBS.filter(v=>D.groups.includes(v.g)&&(D.source==='all'||v.src));
+  let v,p,tries=0;
+  do{v=rnd(pool);p=Math.floor(Math.random()*6);tries++}while(D.cur&&v.inf===D.cur.v.inf&&p===D.cur.p&&tries<10);
+  return {v,p,pron:rnd(PV[p])};
+}
+function nextD(){D.cur=pickD();renderD()}
+function renderD(){renderDrill($('#dCard'),D,nextD)}
+function renderDrill(box,st,onNext){
+  const {v,p,pron}=st.cur;st.checked=false;st.solved=false;
+  const head=`<div class="row" style="justify-content:space-between"><span class="score">${st===E?'Работа над ошибками':'Формы'}</span><span class="score">верно <b>${st.ok}</b> / ${st.n} · серия <b>${st.streak}</b></span></div>
+   <div class="prompt"><span class="pron">${pron}</span> · ${esc(v.inf)}</div><div class="sub">${esc(v.ru)}${pron==='pan'||pron==='pani'?' · вежливое «Вы» → как on/ona':''}</div>`;
+  if(st.mode==='choice'){
+    const uniq=[...new Set(v.f)];const others=shuffle(uniq.filter(f=>f!==v.f[p])).slice(0,3);
+    const opts=shuffle([v.f[p],...others]);
+    box.innerHTML=head+`<div class="choices">${opts.map(o=>`<button data-o="${esc(o)}">${esc(o)}</button>`).join('')}</div><div class="fb-slot"></div>
+      <div class="actions"><button class="btn primary nx hidden">Дальше →</button><button class="btn ghost hn">Подсказка</button></div>`;
+    box.querySelector('.choices').onclick=e=>{
+      const b=e.target.closest('button');if(!b||st.checked)return;
+      const res=judge(b.dataset.o,v,p);finish(res,b.dataset.o);
+      box.querySelectorAll('.choices button').forEach(x=>{if(x.dataset.o===v.f[p])x.classList.add('ok');else if(x===b)x.classList.add('bad')});
+    };
+  }else{
+    box.innerHTML=head+`<input class="ans" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="${pron} …"><div class="fb-slot"></div>
+      <div class="actions"><button class="btn primary ck">Проверить</button><button class="btn primary nx hidden">Дальше →</button><button class="btn ghost hn">Подсказка</button><button class="btn ghost sw">Ответ</button></div>`;
+    const inp=box.querySelector('input');
+    if(matchMedia('(hover:hover)').matches)inp.focus();
+    const go=()=>{
+      if(st.solved){onNext();focusAfter(box);return}
+      if(!inp.value.trim()){inp.focus();return}
+      const res=judge(inp.value,v,p);inp.classList.remove('ok','bad','diac');inp.classList.add(cls(res.r));
+      if(st.checked){retry(res,inp.value);return}
+      finish(res,inp.value)};
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();go()}});
+    box.querySelector('.ck').onclick=go;
+    box.querySelector('.sw').onclick=()=>{if(st.checked)return;inp.value=v.f[p];inp.classList.add('diac');finish({r:'show'},'')};
+  }
+  box.querySelector('.hn').onclick=()=>{if(!st.checked)box.querySelector('.fb-slot').innerHTML=hintHTML(v,p)};
+  box.querySelector('.nx').onclick=()=>{onNext();focusAfter(box)};
+  function setSolved(){
+    st.solved=true;const i=box.querySelector('input');if(i)i.readOnly=true;
+    box.querySelectorAll('.ck,.sw,.hn').forEach(x=>x.classList.add('hidden'));
+    const nx=box.querySelector('.nx');nx.classList.remove('hidden','ghost');nx.classList.add('primary');
+  }
+  function finish(res,user){
+    st.checked=true;st.n++;
+    if(res.r==='ok'){st.ok++;st.streak++;okMist(v.inf,p)}else{st.streak=0;addMist(v.inf,p)}
+    box.querySelector('.fb-slot').innerHTML=fbHTML(res,v,p,user);
+    box.querySelector('.score:last-child').innerHTML=`верно <b>${st.ok}</b> / ${st.n} · серия <b>${st.streak}</b>`;
+    const i=box.querySelector('input');
+    if(res.r==='ok'||res.r==='show'||!i){setSolved();return}
+    // неверно: даём ввести ещё раз
+    box.querySelectorAll('.sw,.hn').forEach(x=>x.classList.add('hidden'));
+    box.querySelector('.ck').textContent='Проверить ещё раз';
+    const nx=box.querySelector('.nx');nx.classList.remove('hidden','primary');nx.classList.add('ghost');
+    i.focus();i.select();
+  }
+  function retry(res,user){
+    if(res.r==='ok'){box.querySelector('.fb-slot').innerHTML=`<div class="fb ok">✓ Теперь верно: <b>${esc(v.f[p])}</b></div>`;setSolved();return}
+    box.querySelector('.fb-slot').innerHTML=fbHTML(res,v,p,user);
+    const i=box.querySelector('input');i.focus();i.select();
+  }
+}
+function focusAfter(box){const i=box.querySelector('input.ans');if(i)i.focus()}
+
+/* ---------- ТАБЛИЦА ---------- */
+function tSel(){
+  $('#tSel').innerHTML=Object.entries(G).map(([k,g])=>`<optgroup label="${esc(g.name)}">${VERBS.filter(v=>v.g===k).map(v=>`<option value="${esc(v.inf)}">${esc(v.inf)} — ${esc(v.ru)}</option>`).join('')}</optgroup>`).join('');
+}
+const T={first:true};
+function renderT(inf){
+  const v=V[inf];$('#tSel').value=inf;T.first=true;$('#tCheck').textContent='Проверить';
+  $('#tBody').innerHTML=`<div class="grid6">${P.map((p,i)=>`<span class="p">${p}</span><input class="ans" data-i="${i}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next">`).join('')}</div><div id="tFb"></div>`;
+  const ins=[...$('#tBody').querySelectorAll('input')];
+  ins.forEach((inp,i)=>inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();if(T.first&&i<5)ins[i+1].focus();else checkT()}}));
+  if(matchMedia('(hover:hover)').matches)ins[0].focus();
+}
+function checkT(){
+  const v=V[$('#tSel').value];let ok=0;
+  $('#tBody').querySelectorAll('.fix').forEach(x=>x.remove());
+  $('#tBody').querySelectorAll('input').forEach(inp=>{
+    const i=+inp.dataset.i,res=judge(inp.value,v,i);
+    inp.classList.remove('ok','bad','diac');inp.classList.add(cls(res.r==='empty'?'bad':res.r));
+    if(res.r==='ok'){ok++;if(T.first)okMist(v.inf,i);inp.readOnly=true}
+    else{if(T.first)addMist(v.inf,i);const d=document.createElement('div');d.className='fix';
+      d.innerHTML=(res.r==='person'?`это форма для ${P[res.idx]} · `:'')+'правильно: <b>'+esc(v.f[i])+'</b>';inp.after(d)}
+  });
+  T.first=false;$('#tCheck').textContent=ok===6?'Проверить':'Проверить ещё раз';
+  if(ok<6){const w=$('#tBody').querySelector('input:not([readonly])');w.focus();w.select()}
+  $('#tFb').innerHTML=`<div class="fb ${ok===6?'ok':'hint'}">${ok===6?'✓ Wszystko dobrze!':'Верно '+ok+' из 6. Исправь красные поля и проверь ещё раз.'} <span class="muted">${esc(G[v.g].name)}</span></div>`;
+}
+$('#tSel').onchange=()=>renderT($('#tSel').value);
+$('#tRand').onclick=$('#tNext').onclick=()=>renderT(rnd(VERBS).inf);
+$('#tCheck').onclick=checkT;
+
+/* ---------- ОШИБКИ ---------- */
+const E={mode:'type',ok:0,n:0,streak:0,cur:null,checked:false};
+function pickE(){
+  const keys=Object.keys(MIST);if(!keys.length)return null;
+  const w=keys.flatMap(k=>Array(Math.min(MIST[k],4)).fill(k));
+  let k,t=0;do{k=rnd(w);t++}while(E.cur&&keys.length>1&&k===E.cur.v.inf+'|'+E.cur.p&&t<10);
+  const [inf,p]=k.split('|');return {v:V[inf],p:+p,pron:rnd(PV[+p])};
+}
+function renderE(){
+  const c=pickE();
+  if(!c){$('#eCard').innerHTML='<div class="empty">Ошибок пока нет. Сделай упражнения — сюда попадут формы, в которых ты ошибся.</div>';$('#eList').classList.add('hidden');return}
+  E.cur=c;renderDrill($('#eCard'),E,renderE);
+  const top=Object.entries(MIST).sort((a,b)=>b[1]-a[1]).slice(0,15);
+  $('#eList').classList.remove('hidden');
+  $('#eList').innerHTML=`<p class="label">Трудные формы (уходят после верного ответа)</p><ul class="list">${top.map(([k,n])=>{const [inf,p]=k.split('|');return `<li>${P[p]} · <b>${esc(V[inf].f[p])}</b> <span class="muted">(${esc(inf)}) ×${n}</span></li>`}).join('')}</ul>
+   <div class="actions"><button class="btn ghost" id="eClear">Очистить список</button></div>`;
+  $('#eClear').onclick=()=>{MIST={};store.set('plc-mist',MIST);updErr();renderE()};
+}
+
+/* ---------- ШПАРГАЛКА ---------- */
+function renderRef(){
+  $('#ref').innerHTML=`<div class="card"><h2>Как выбрать форму</h2><ol class="list">
+   <li><b>Лицо:</b> местоимение в скобках или подлежащее (Marek = on, dwa samochody = one, pan/pani = on/ona).</li>
+   <li><b>Группа:</b> по инфинитиву — -ować → A, -ać → B, -ić/-yć/-eć → C. Но pisać, dawać → D; woleć → C; rozumieć → особые.</li>
+   <li><b>Форма:</b> основа + окончание. <i>się</i> стоит после глагола.</li></ol></div>`+
+  Object.entries(G).map(([k,g])=>{
+    const vs=VERBS.filter(v=>v.g===k);const ex=vs[0];
+    return `<div class="card"><h2>${esc(g.name)}</h2><p style="margin:0">${g.rule}</p>
+     <div class="ends">${g.ends.map((e,i)=>`<div><small>${P[i]}</small>${esc(e)}</div>`).join('')}</div>
+     ${vs.map(v=>`<details><summary>${esc(v.inf)} <span>— ${esc(v.ru)}</span></summary>${conjTable(v,-1)}</details>`).join('')}</div>`;
+  }).join('');
+}
+
+/* ---------- навигация ---------- */
+const VIEWS=['zdania','formy','tabela','bledy','sciaga'];
+function route(){
+  const h=location.hash.slice(1);const v=VIEWS.includes(h)?h:'zdania';
+  VIEWS.forEach(x=>$('#v-'+x).classList.toggle('hidden',x!==v));
+  document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.dataset.v===v));
+  if(v==='bledy')renderE();
+  if(v==='formy'&&!D.cur)nextD();
+}
+window.addEventListener('hashchange',route);
+
+/* ---------- клавиатура только там, где есть поле ввода ---------- */
+function updKbd(){
+  const on=!!document.querySelector('.view:not(.hidden) input.ans:not([readonly])');
+  $('#kbd').classList.toggle('hide',!on);document.body.classList.toggle('has-kbd',on);
+}
+new MutationObserver(updKbd).observe(document.querySelector('.wrap'),{subtree:true,childList:true,attributes:true,attributeFilter:['class','readonly']});
+
+/* ---------- старт ---------- */
+setChips();grpChips();
+document.querySelectorAll('#modeChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.m===D.mode));
+tSel();renderT(rnd(VERBS).inf);renderRef();updErr();
+startSet(store.get('plc-set','7A'));
+route();
+if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
+</script>
+</body>
+</html>
