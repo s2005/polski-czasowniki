@@ -209,6 +209,7 @@ input.num:focus{border-color:var(--ink)}
 
 <!-- ============ BLEDY ============ -->
 <section id="v-bledy" class="view">
+  <div class="card hidden" id="eKind"><p class="label">Что повторять</p><div class="chips" id="eKinds"></div></div>
   <div class="card" id="eCard"></div>
   <div class="card" id="eList"></div>
 </section>
@@ -408,7 +409,12 @@ const store = {
 let MIST = store.get('plc-mist',{});
 function addMist(inf,p){const k=inf+'|'+p;MIST[k]=(MIST[k]||0)+1;store.set('plc-mist',MIST);updErr()}
 function okMist(inf,p){const k=inf+'|'+p;if(MIST[k]){MIST[k]--;if(MIST[k]<=0)delete MIST[k];store.set('plc-mist',MIST);updErr()}}
-function updErr(){const n=Object.keys(MIST).length;$('#errCount').textContent=n?'· '+n:''}
+// Ошибки в «Biernik»: ключ тема|слово|падеж (b или m)
+let MISTB = store.get('plc-bmist',{});
+const bKey = cur => cur.th+'|'+cur.w.m+'|'+cur.cs;
+function addMistB(cur){const k=bKey(cur);MISTB[k]=(MISTB[k]||0)+1;store.set('plc-bmist',MISTB);updErr()}
+function okMistB(cur){const k=bKey(cur);if(MISTB[k]){MISTB[k]--;if(MISTB[k]<=0)delete MISTB[k];store.set('plc-bmist',MISTB);updErr()}}
+function updErr(){const n=Object.keys(MIST).length+Object.keys(MISTB).length;$('#errCount').textContent=n?'· '+n:''}
 
 /* ---------- проверка ---------- */
 function judge(user, verb, p){
@@ -782,10 +788,13 @@ if(!['mix','b','m'].includes(Z.c))Z.c='mix';
 function pickZ(){
   let th,w,t=0;
   do{th=rnd(Z.th);w=rnd(BT[th].w);t++}while(Z.cur&&w===Z.cur.w&&t<10);
-  const T=BT[th],cs=Z.c==='mix'?rnd(['b','m']):Z.c;
-  let fr=cs==='b'?rnd(w.B||T.B):rnd(T.M);
+  const cs=Z.c==='mix'?rnd(['b','m']):Z.c;
+  return {th,w,cs,fr:zFrame(th,w,cs)};
+}
+function zFrame(th,w,cs){
+  const T=BT[th];let fr=cs==='b'?rnd(w.B||T.B):rnd(T.M);
   if(cs==='m'&&w.t.startsWith('p'))fr=fr.replace(/\bjest\b/,'są');
-  return {th,w,cs,fr};
+  return fr;
 }
 const zAns = cur => cur.cs==='b'?cur.w.b:cur.w.m;
 // Для mv засчитываются обе формы biernika
@@ -832,12 +841,13 @@ $('#zTh').onclick=e=>{
   store.set('plc-bt',Z.th);zChips();nextZ();
 };
 $('#zChips').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;Z.c=b.dataset.z;store.set('plc-bc',Z.c);zChips();nextZ()};
-function nextZ(){Z.cur=pickZ();renderZ()}
-function renderZ(){
-  const box=$('#zCard'),cur=Z.cur,T=BT[cur.th];Z.checked=false;Z.solved=false;
-  const score=()=>`верно <b>${Z.ok}</b> / ${Z.n} · серия <b>${Z.streak}</b>`;
+function nextZ(){Z.cur=pickZ();renderZ($('#zCard'),Z,nextZ)}
+// st - состояние (Z для вкладки «Biernik», ZE для «Ошибок»), onNext - следующее задание
+function renderZ(box,st,onNext){
+  const cur=st.cur,T=BT[cur.th];st.checked=false;st.solved=false;
+  const score=()=>`верно <b>${st.ok}</b> / ${st.n} · серия <b>${st.streak}</b>`;
   const [pre,post]=esc(cur.fr).split('___');
-  box.innerHTML=`<div class="row" style="justify-content:space-between"><span class="score">${esc(T.t)}</span><span class="score zs">${score()}</span></div>
+  box.innerHTML=`<div class="row" style="justify-content:space-between"><span class="score">${st===Z?'':'Работа над ошибками · '}${esc(T.t)}</span><span class="score zs">${score()}</span></div>
     ${T.lead?`<div class="sub" style="margin:6px 0 4px">${T.lead}</div>`:''}
     <div class="sentence">${pre}<input class="ans" style="width:12.5em;max-width:100%" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done">${post}</div>
     <div class="sub" style="margin:4px 0 0"><span class="verb-tag">${esc(cur.w.m)}</span> ${esc(cur.w.ru)}</div>
@@ -845,14 +855,14 @@ function renderZ(){
     <div class="actions"><button class="btn primary ck">Проверить</button><button class="btn primary nx hidden">Дальше →</button><button class="btn ghost hn">Подсказка</button><button class="btn ghost sw">Ответ</button></div>`;
   const inp=box.querySelector('input'),slot=box.querySelector('.fb-slot'),ck=box.querySelector('.ck'),nx=box.querySelector('.nx');
   if(matchMedia('(hover:hover)').matches)inp.focus();
-  const solved=()=>{Z.solved=true;inp.readOnly=true;box.querySelectorAll('.ck,.sw,.hn').forEach(x=>x.classList.add('hidden'));nx.classList.remove('hidden','ghost');nx.classList.add('primary');nx.focus()};
-  const next=()=>{nextZ();focusAfter(box)};
+  const solved=()=>{st.solved=true;inp.readOnly=true;box.querySelectorAll('.ck,.sw,.hn').forEach(x=>x.classList.add('hidden'));nx.classList.remove('hidden','ghost');nx.classList.add('primary');nx.focus()};
+  const next=()=>{onNext();focusAfter(box)};
   const go=()=>{
-    if(Z.solved){next();return}
+    if(st.solved){next();return}
     if(!inp.value.trim()){inp.focus();return}
     const res=judgeZ(inp.value,cur);
     inp.classList.remove('ok','bad','diac');inp.classList.add(cls(res));
-    if(!Z.checked){Z.checked=true;Z.n++;if(res==='ok'){Z.ok++;Z.streak++}else Z.streak=0;box.querySelector('.zs').innerHTML=score()}
+    if(!st.checked){st.checked=true;st.n++;if(res==='ok'){st.ok++;st.streak++;okMistB(cur)}else{st.streak=0;addMistB(cur)}box.querySelector('.zs').innerHTML=score()}
     else if(res==='ok'){slot.innerHTML=`<div class="fb ok">✓ Теперь верно: <b class="ink">${zSent(cur,esc(zAns(cur)))}</b></div>`;solved();return}
     slot.innerHTML=fbZ(res,cur,inp.value);
     if(res==='ok'){solved();return}
@@ -865,13 +875,26 @@ function renderZ(){
   ck.onclick=go;nx.onclick=next;
   box.querySelector('.hn').onclick=()=>{slot.innerHTML=`<div class="fb hint">${zWhy(cur)}</div>`};
   box.querySelector('.sw').onclick=()=>{
-    Z.checked=true;Z.n++;Z.streak=0;box.querySelector('.zs').innerHTML=score();
+    st.checked=true;st.n++;st.streak=0;addMistB(cur);box.querySelector('.zs').innerHTML=score();
     inp.value=zAns(cur);inp.classList.add('diac');slot.innerHTML=fbZ('show',cur,'');solved();
   };
 }
 
 /* ---------- ОШИБКИ ---------- */
-const E={mode:'type',ok:0,n:0,streak:0,cur:null,checked:false};
+const E={mode:'type',ok:0,n:0,streak:0,cur:null,checked:false,kind:'v'};
+const ZE={ok:0,n:0,streak:0,cur:null,checked:false,solved:false};
+// Слова, которых больше нет в BT, убираем из списка ошибок
+function cleanMistB(){
+  Object.keys(MISTB).forEach(k=>{const [th,m]=k.split('|');if(!BT[th]||!BT[th].w.some(w=>w.m===m))delete MISTB[k]});
+  store.set('plc-bmist',MISTB);
+}
+function pickBE(){
+  const keys=Object.keys(MISTB);if(!keys.length)return null;
+  const ws=keys.flatMap(k=>Array(Math.min(MISTB[k],4)).fill(k));
+  let k,t=0;do{k=rnd(ws);t++}while(ZE.cur&&keys.length>1&&k===bKey(ZE.cur)&&t<10);
+  const [th,m,cs]=k.split('|'),w=BT[th].w.find(x=>x.m===m);
+  return {th,w,cs,fr:zFrame(th,w,cs)};
+}
 function pickE(){
   const keys=Object.keys(MIST);if(!keys.length)return null;
   const w=keys.flatMap(k=>Array(Math.min(MIST[k],4)).fill(k));
@@ -879,14 +902,29 @@ function pickE(){
   const [inf,p]=k.split('|');return {v:V[inf],p:+p,pron:rnd(PV[+p])};
 }
 function renderE(){
-  const c=pickE();
-  if(!c){$('#eCard').innerHTML='<div class="empty">Ошибок пока нет. Сделай упражнения — сюда попадут формы, в которых ты ошибся.</div>';$('#eList').classList.add('hidden');return}
-  E.cur=c;renderDrill($('#eCard'),E,renderE);
+  cleanMistB();updErr();
+  const nv=Object.keys(MIST).length,nb=Object.keys(MISTB).length;
+  $('#eKind').classList.toggle('hidden',!(nv&&nb));
+  if(!nv&&!nb){$('#eCard').innerHTML='<div class="empty">Ошибок пока нет. Сделай упражнения — сюда попадут формы, в которых ты ошибся.</div>';$('#eList').classList.add('hidden');return}
+  if(E.kind==='v'&&!nv)E.kind='b';
+  if(E.kind==='b'&&!nb)E.kind='v';
+  $('#eKinds').innerHTML=`<button class="chip${E.kind==='v'?' on':''}" data-k="v">Формы глаголов · ${nv}</button><button class="chip${E.kind==='b'?' on':''}" data-k="b">Biernik · ${nb}</button>`;
+  if(E.kind==='b'){renderBE();return}
+  E.cur=pickE();renderDrill($('#eCard'),E,renderE);
   const top=Object.entries(MIST).sort((a,b)=>b[1]-a[1]).slice(0,15);
   $('#eList').classList.remove('hidden');
   $('#eList').innerHTML=`<p class="label">Трудные формы (уходят после верного ответа)</p><ul class="list">${top.map(([k,n])=>{const [inf,p]=k.split('|');return `<li>${P[p]} · <b>${esc(V[inf].f[p])}</b> <span class="muted">(${esc(inf)}) ×${n}</span></li>`}).join('')}</ul>
    <div class="actions"><button class="btn ghost" id="eClear">Очистить список</button></div>`;
   $('#eClear').onclick=()=>{MIST={};store.set('plc-mist',MIST);updErr();renderE()};
+}
+$('#eKinds').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;E.kind=b.dataset.k;renderE()};
+function renderBE(){
+  ZE.cur=pickBE();renderZ($('#eCard'),ZE,renderE);
+  const top=Object.entries(MISTB).sort((a,b)=>b[1]-a[1]).slice(0,15);
+  $('#eList').classList.remove('hidden');
+  $('#eList').innerHTML=`<p class="label">Трудные слова: падеж (уходят после верного ответа)</p><ul class="list">${top.map(([k,n])=>{const [th,m,cs]=k.split('|'),w=BT[th].w.find(x=>x.m===m);return `<li>${cs==='b'?'biernik':'mianownik'} · <b>${esc(cs==='b'?w.b:w.m)}</b> <span class="muted">(${esc(w.m)}) ×${n}</span></li>`}).join('')}</ul>
+   <div class="actions"><button class="btn ghost" id="eClear">Очистить список</button></div>`;
+  $('#eClear').onclick=()=>{MISTB={};store.set('plc-bmist',MISTB);updErr();renderE()};
 }
 
 /* ---------- ШПАРГАЛКА ---------- */
