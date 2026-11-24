@@ -126,6 +126,7 @@ input.num:focus{border-color:var(--ink)}
   <a href="#zdania" data-v="zdania">Предложения</a>
   <a href="#formy" data-v="formy">Формы</a>
   <a href="#tabela" data-v="tabela">Таблица</a>
+  <a href="#biernik" data-v="biernik">Biernik</a>
   <a href="#bledy" data-v="bledy">Ошибки <span id="errCount"></span></a>
   <a href="#sciaga" data-v="sciaga">Шпаргалка</a>
   <a href="#slowa" data-v="slowa">Слова</a>
@@ -174,6 +175,36 @@ input.num:focus{border-color:var(--ink)}
     <div id="tBody"></div>
     <div class="actions"><button class="btn primary" id="tCheck">Проверить</button><button class="btn ghost" id="tNext">Следующий</button></div>
   </div>
+</section>
+
+<!-- ============ BIERNIK ============ -->
+<section id="v-biernik" class="view">
+  <div class="card">
+    <p class="label">Темы</p>
+    <div class="chips" id="zTh"></div>
+    <p class="label" style="margin-top:14px">Падеж</p>
+    <div class="chips" id="zChips">
+      <button class="chip" data-z="mix">Вперемешку</button>
+      <button class="chip" data-z="b">только biernik</button>
+      <button class="chip" data-z="m">только mianownik</button>
+    </div>
+    <details style="margin-top:12px"><summary>Правило <span>· mianownik / biernik</span></summary>
+      <h3 style="margin-top:10px"><span class="end">Mianownik</span> — форма как в словаре</h3>
+      <p class="muted" style="margin:0">После <i>to jest, tu jest, gdzie jest, dla mnie</i>: To jest <b>kawa</b>. Gdzie jest <b>brat</b>? Dla mnie <b>kurczak z frytkami</b>.</p>
+      <h3 style="margin-top:10px"><span class="end">Biernik</span> — кого? что? после глагола</h3>
+      <p class="muted" style="margin:0">После <i>mam, lubię, kocham, kupuję, biorę, widzę, oglądam, czytam, piszę, znam, proszę, czekam na</i>: Mam <b>brata</b>. Kupuję <b>kawę</b>. Proszę <b>kurczaka z frytkami</b>. Czekam na <b>autobus</b>.</p>
+      <table class="conj">
+        <tr><td>женский род на -a</td><td>kawa → kaw<b>ę</b>, zupa pomidorowa → zup<b>ę</b> pomidorow<b>ą</b>, teściowa → teściow<b>ą</b></td></tr>
+        <tr><td>мужской, одушевлённый</td><td>brat → brat<b>a</b>, pies → ps<b>a</b>, kurczak → kurczak<b>a</b>, znajomy → znajom<b>ego</b></td></tr>
+        <tr><td>мужской на -a</td><td>tata → tat<b>ę</b>, turysta → turyst<b>ę</b></td></tr>
+        <tr><td>мужской, неодушевлённый</td><td>sok, autobus, sweter — не меняется</td></tr>
+        <tr><td>средний род</td><td>piwo, łóżko, miasto — не меняется</td></tr>
+        <tr><td>множественное число</td><td>frytki, spodnie, dzieci — не меняется; с мужчинами: rodzice → rodzic<b>ów</b></td></tr>
+      </table>
+      <p class="muted" style="margin:8px 0 0">Часть после <i>z, na</i> не меняется: <i>z mlekiem, z frytkami, na boczku</i>. Овощи и фрукты мужского рода часто получают -a (ogórka, banana); засчитываются обе формы.</p>
+    </details>
+  </div>
+  <div class="card" id="zCard"></div>
 </section>
 
 <!-- ============ BLEDY ============ -->
@@ -629,6 +660,216 @@ $('#tSel').onchange=()=>renderT($('#tSel').value);
 $('#tRand').onclick=$('#tNext').onclick=()=>renderT(rnd(VERBS).inf);
 $('#tCheck').onclick=checkT;
 
+/* ---------- BIERNIK: mianownik или biernik после глагола ---------- */
+// Слово: 'mianownik|biernik|тип|перевод|свои фразы для biernik через ;'.
+// Пустой biernik - не меняется. Тип - ключ ZK. Слова - из словаря учебника POLSKI krok po kroku 1.
+const ZK = {
+  f:{n:'Женский род',r:'-a → <b>-ę</b>, прилагательное -a → <b>-ą</b>'},
+  fa:{n:'Женский род, склоняется как прилагательное',r:'-a → <b>-ą</b>'},
+  fc:{n:'Женский род на согласный',r:'не меняется'},
+  ma:{n:'Мужской род, одушевлённый (люди и животные, в том числе курица и рыбы: kurczak, łosoś)',r:'+<b>a</b>, прилагательное → <b>-ego</b>. Беглое -e- выпадает: pies → psa, ojciec → ojca'},
+  mA:{n:'Мужской род на -a',r:'как женский: -a → <b>-ę</b>'},
+  mv:{n:'Мужской род: овощи, фрукты, котлета',r:'часто +<b>a</b>, как у одушевлённых (ogórka, banana), и без изменения (ogórek, banan) — засчитываются обе формы'},
+  mi:{n:'Мужской род, неодушевлённый',r:'не меняется'},
+  n:{n:'Средний род',r:'не меняется'},
+  pl:{n:'Множественное число',r:'не меняется'},
+  pv:{n:'Множественное число с мужчинами',r:'→ <b>-ów</b>, как в dopełniacz'},
+};
+const BT = {
+  zam:{t:'Заказ',lead:'Kelner: <i>Co dla państwa?</i>',B:['Proszę ___.'],M:['Dla mnie ___.'],w:[
+    'kawa z mlekiem|kawę z mlekiem|f|кофе с молоком','herbata z cytryną|herbatę z cytryną|f|чай с лимоном',
+    'pizza|pizzę|f|пицца','zupa pomidorowa|zupę pomidorową|f|томатный суп',
+    'woda mineralna|wodę mineralną|f|минеральная вода','sałatka grecka|sałatkę grecką|f|греческий салат',
+    'szarlotka|szarlotkę|f|шарлотка','kanapka z serem|kanapkę z serem|f|бутерброд с сыром',
+    'gorąca czekolada|gorącą czekoladę|f|горячий шоколад','jajecznica na boczku|jajecznicę na boczku|f|яичница с беконом',
+    'lemoniada|lemoniadę|f|лимонад','zapiekanka|zapiekankę|f|запеканка (багет с начинкой)',
+    'kurczak z frytkami|kurczaka z frytkami|ma|курица с картошкой фри','pstrąg z grilla|pstrąga z grilla|ma|форель на гриле',
+    'łosoś z ryżem|łososia z ryżem|ma|лосось с рисом','schabowy z ziemniakami|schabowego z ziemniakami|ma|отбивная с картофелем',
+    'indyk z warzywami|indyka z warzywami|ma|индейка с овощами',
+    'sok pomarańczowy||mi|апельсиновый сок','sernik||mi|творожный торт (чизкейк)',
+    'rosół z makaronem||mi|бульон с лапшой','barszcz czerwony||mi|красный борщ',
+    'makaron z kurczakiem||mi|паста с курицей','bigos||mi|бигос','żurek||mi|журек',
+    'kompot||mi|компот','deser||mi|десерт','koktajl||mi|коктейль',
+    'piwo||n|пиво','czerwone wino||n|красное вино','ciasto czekoladowe||n|шоколадный пирог','spaghetti||n|спагетти',
+    'frytki||pl|картошка фри','pierogi ruskie||pl|вареники с картошкой и творогом',
+    'naleśniki z serem||pl|блинчики с творогом','lody waniliowe||pl|ванильное мороженое']},
+  jedz:{t:'Продукты',B:['Kupuję ___.','Lubię ___.','Mam ___.'],M:['To jest ___.','Gdzie jest ___?','Tu jest ___.'],w:[
+    'bułka|bułkę|f|булочка','cytryna|cytrynę|f|лимон','sałata|sałatę|f|салат (листья)','szynka|szynkę|f|ветчина',
+    'herbata|herbatę|f|чай','kawa|kawę|f|кофе','kasza|kaszę|f|крупа, каша','kiełbasa|kiełbasę|f|колбаса',
+    'margaryna|margarynę|f|маргарин','ryba|rybę|f|рыба','wędlina|wędlinę|f|мясная нарезка','śmietana|śmietanę|f|сметана',
+    'brzoskwinia|brzoskwinię|f|персик','cebula|cebulę|f|лук','śliwka|śliwkę|f|слива','fasola|fasolę|f|фасоль',
+    'gruszka|gruszkę|f|груша','kapusta|kapustę|f|капуста','kukurydza|kukurydzę|f|кукуруза','malina|malinę|f|малина',
+    'marchewka|marchewkę|f|морковка','papryka|paprykę|f|перец (овощ)','pomarańcza|pomarańczę|f|апельсин',
+    'pietruszka|pietruszkę|f|петрушка','rzodkiewka|rzodkiewkę|f|редиска','truskawka|truskawkę|f|клубника',
+    'wiśnia|wiśnię|f|вишня','czekolada|czekoladę|f|шоколад','sól||fc|соль',
+    'chleb||mi|хлеб','cukier||mi|сахар','sok||mi|сок','biały ser||mi|творог','żółty ser||mi|сыр',
+    'dżem||mi|джем','jogurt||mi|йогурт','makaron||mi|макароны','miód||mi|мёд','pieprz||mi|чёрный перец',
+    'ryż||mi|рис','czosnek||mi|чеснок','groszek||mi|зелёный горошек','szpinak||mi|шпинат','tort||mi|торт',
+    'ogórek|ogórka|mv|огурец','ziemniak|ziemniaka|mv|картофелина','pomidor|pomidora|mv|помидор',
+    'grzyb|grzyba|mv|гриб','kalafior|kalafiora|mv|цветная капуста','banan||mv|банан','ananas||mv|ананас',
+    'arbuz||mv|арбуз','kotlet||mv|котлета',
+    'kurczak|kurczaka|ma|курица','łosoś|łososia|ma|лосось','dorsz|dorsza|ma|треска','pstrąg|pstrąga|ma|форель',
+    'indyk|indyka|ma|индейка',
+    'jabłko||n|яблоко','jajko||n|яйцо','masło||n|сливочное масло','mleko||n|молоко','mięso||n|мясо',
+    'ciasto||n|пирог','ciastko||n|пирожное','wino||n|вино',
+    'lody||pl|мороженое','słodycze||pl|сладости']},
+  ludzie:{t:'Люди и животные',B:['Mam ___.','Kocham ___.','Widzę ___.'],M:['To jest ___.','Gdzie jest ___?'],w:[
+    'brat|brata|ma|брат','syn|syna|ma|сын','ojciec|ojca|ma|отец','dziadek|dziadka|ma|дедушка','wujek|wujka|ma|дядя',
+    'kuzyn|kuzyna|ma|двоюродный брат','mąż|męża|ma|муж','chłopak|chłopaka|ma|парень','bratanek|bratanka|ma|племянник',
+    'teść|teścia|ma|тесть','znajomy|znajomego|ma|знакомый','przewodnik|przewodnika|ma|гид|Widzę ___.;Znam ___.;Czekam na ___.',
+    'listonosz|listonosza|ma|почтальон|Widzę ___.;Znam ___.;Czekam na ___.',
+    'fryzjer|fryzjera|ma|парикмахер|Mam ___.;Znam ___.','pies|psa|ma|собака','kot|kota|ma|кот','koń|konia|ma|лошадь',
+    'smok|smoka|ma|дракон|Widzę ___.;Znam ___.','król|króla|ma|король|Widzę ___.;Znam ___.',
+    'tata|tatę|mA|папа','turysta|turystę|mA|турист|Widzę ___.;Znam ___.',
+    'mama|mamę|f|мама','córka|córkę|f|дочка','siostra|siostrę|f|сестра','babcia|babcię|f|бабушка','ciocia|ciocię|f|тётя',
+    'żona|żonę|f|жена','dziewczyna|dziewczynę|f|девушка','kuzynka|kuzynkę|f|двоюродная сестра',
+    'siostrzenica|siostrzenicę|f|племянница','przyjaciółka|przyjaciółkę|f|подруга','koleżanka|koleżankę|f|приятельница, коллега',
+    'matka|matkę|f|мать','rodzina|rodzinę|f|семья','szwagierka|szwagierkę|f|свояченица, золовка',
+    'królewna|królewnę|f|принцесса|Widzę ___.;Znam ___.',
+    'bratowa|bratową|fa|жена брата','teściowa|teściową|fa|тёща, свекровь','synowa|synową|fa|невестка (жена сына)',
+    'narzeczona|narzeczoną|fa|невеста',
+    'rodzeństwo||n|братья и сёстры','dzieci||pl|дети',
+    'rodzice|rodziców|pv|родители','dziadkowie|dziadków|pv|бабушка и дедушка']},
+  ubr:{t:'Одежда',B:['Kupuję ___.','Mam ___.','Biorę ___.'],M:['To jest ___.','Gdzie jest ___?'],w:[
+    'bluzka|bluzkę|f|блузка','czapka|czapkę|f|шапка','chustka|chustkę|f|платок','spódnica|spódnicę|f|юбка',
+    'sukienka|sukienkę|f|платье','kamizelka|kamizelkę|f|жилет','koszula|koszulę|f|рубашка','kurtka|kurtkę|f|куртка',
+    'marynarka|marynarkę|f|пиджак',
+    'szalik||mi|шарф','sweter||mi|свитер','żakiet||mi|жакет','dres||mi|спортивный костюм','garnitur||mi|мужской костюм',
+    'kapelusz||mi|шляпа','kostium||mi|женский костюм','krawat||mi|галстук','płaszcz||mi|пальто, плащ',
+    'podkoszulek||mi|майка','pasek||mi|ремень',
+    'ubranie||n|одежда',
+    'spodnie||pl|брюки','szorty||pl|шорты','rajstopy||pl|колготки','buty||pl|обувь, ботинки','skarpety||pl|носки',
+    'rękawiczki||pl|перчатки','adidasy||pl|кроссовки','sandały||pl|сандалии']},
+  dom:{t:'Дом и кухня',B:['Kupuję ___.','Mam ___.','Widzę ___.'],M:['To jest ___.','Gdzie jest ___?','Tu jest ___.'],w:[
+    'lampa|lampę|f|лампа','lodówka|lodówkę|f|холодильник','sofa|sofę|f|диван','szafa|szafę|f|шкаф','szafka|szafkę|f|шкафчик',
+    'zmywarka|zmywarkę|f|посудомоечная машина','komoda|komodę|f|комод','kuchenka|kuchenkę|f|плита',
+    'poduszka|poduszkę|f|подушка','półka|półkę|f|полка','pralka|pralkę|f|стиральная машина',
+    'łyżka|łyżkę|f|ложка','łyżeczka|łyżeczkę|f|чайная ложка','szklanka|szklankę|f|стакан','filiżanka|filiżankę|f|чашка',
+    'miska|miskę|f|миска','patelnia|patelnię|f|сковорода',
+    'dywan||mi|ковёр','fotel||mi|кресло','obraz||mi|картина','regał||mi|стеллаж','telewizor||mi|телевизор',
+    'wieszak||mi|вешалка','czajnik||mi|чайник','garnek||mi|кастрюля','nóż||mi|нож','talerz||mi|тарелка',
+    'widelec||mi|вилка','stół||mi|стол','kubek||mi|кружка',
+    'biurko||n|письменный стол','lustro||n|зеркало','łóżko||n|кровать','krzesło||n|стул']},
+  miasto:{t:'Город и транспорт',B:['Widzę ___.','Oglądam ___.'],M:['To jest ___.','Gdzie jest ___?'],w:[
+    'katedra|katedrę|f|собор','rzeka|rzekę|f|река','kamienica|kamienicę|f|старый городской дом','wieża|wieżę|f|башня',
+    'wyspa|wyspę|f|остров',
+    'zamek||mi|замок','kościół||mi|костёл, церковь','rynek||mi|рыночная площадь','ratusz||mi|ратуша',
+    'pomnik||mi|памятник','plac||mi|площадь','most||mi|мост','dworzec||mi|вокзал','zabytek||mi|памятник архитектуры',
+    'las||mi|лес','miasto||n|город','jezioro||n|озеро','morze||n|море',
+    'taksówka|taksówkę|f|такси|Czekam na ___.;Widzę ___.;Biorę ___.','winda|windę|f|лифт|Czekam na ___.;Widzę ___.',
+    'autobus||mi|автобус|Czekam na ___.;Widzę ___.','tramwaj||mi|трамвай|Czekam na ___.;Widzę ___.',
+    'pociąg||mi|поезд|Czekam na ___.;Widzę ___.','samochód||mi|машина|Mam ___.;Kupuję ___.;Widzę ___.',
+    'rower||mi|велосипед|Mam ___.;Kupuję ___.;Widzę ___.','motocykl||mi|мотоцикл|Mam ___.;Kupuję ___.;Widzę ___.',
+    'metro||n|метро|Czekam na ___.;Widzę ___.']},
+  rzeczy:{t:'Вещи, чтение, кино',B:['Mam ___.','Kupuję ___.','Widzę ___.'],M:['To jest ___.','Gdzie jest ___?'],w:[
+    'książka|książkę|f|книга|Czytam ___.;Mam ___.;Kupuję ___.','gazeta|gazetę|f|газета|Czytam ___.;Kupuję ___.',
+    'torba|torbę|f|сумка','komórka|komórkę|f|мобильный телефон','gumka|gumkę|f|ластик','mapa|mapę|f|карта',
+    'koperta|kopertę|f|конверт','pocztówka|pocztówkę|f|открытка|Piszę ___.;Kupuję ___.;Mam ___.',
+    'paczka|paczkę|f|посылка|Mam ___.;Czekam na ___.','butelka|butelkę|f|бутылка','pamiątka|pamiątkę|f|сувенир',
+    'legenda|legendę|f|легенда|Czytam ___.;Znam ___.','historia|historię|f|история|Czytam ___.;Znam ___.',
+    'ołówek||mi|карандаш','zeszyt||mi|тетрадь','długopis||mi|ручка','słownik||mi|словарь','plecak||mi|рюкзак',
+    'portfel||mi|кошелёк','znaczek||mi|марка','bilet||mi|билет',
+    'list||mi|письмо|Piszę ___.;Czytam ___.;Mam ___.','film||mi|фильм|Oglądam ___.;Lubię ___.',
+    'mecz||mi|матч|Oglądam ___.;Lubię ___.','paszport||mi|паспорт|Mam ___.;Widzę ___.',
+    'pudełko||n|коробка','słowo||n|слово|Znam ___.;Piszę ___.','zdanie||n|предложение|Piszę ___.;Czytam ___.',
+    'okulary przeciwsłoneczne||pl|солнцезащитные очки','nożyczki||pl|ножницы','pieniądze||pl|деньги|Mam ___.;Widzę ___.']},
+};
+// Разбираем строки слов один раз
+Object.values(BT).forEach(th=>{th.w=th.w.map(s=>{const [m,b,t,ru,fr]=s.split('|');return {m,b:b||m,t,ru,B:fr?fr.split(';'):null}})});
+const Z = {th:store.get('plc-bt',Object.keys(BT)),c:store.get('plc-bc','mix'),ok:0,n:0,streak:0,cur:null,checked:false,solved:false};
+Z.th=Z.th.filter(k=>BT[k]);if(!Z.th.length)Z.th=Object.keys(BT);
+if(!['mix','b','m'].includes(Z.c))Z.c='mix';
+function pickZ(){
+  let th,w,t=0;
+  do{th=rnd(Z.th);w=rnd(BT[th].w);t++}while(Z.cur&&w===Z.cur.w&&t<10);
+  const T=BT[th],cs=Z.c==='mix'?rnd(['b','m']):Z.c;
+  let fr=cs==='b'?rnd(w.B||T.B):rnd(T.M);
+  if(cs==='m'&&w.t.startsWith('p'))fr=fr.replace(/\bjest\b/,'są');
+  return {th,w,cs,fr};
+}
+const zAns = cur => cur.cs==='b'?cur.w.b:cur.w.m;
+// Для mv засчитываются обе формы biernika
+const zAlt = cur => cur.cs==='b'&&cur.w.t==='mv'?(cur.w.b===cur.w.m?cur.w.m+'a':cur.w.m):null;
+const zSent = (cur,x) => esc(cur.fr).replace('___',x);
+const zTrig = cur => cur.fr.split('___')[0].trim().toLowerCase();
+// Если ввели всю фразу целиком, начало фразы отбрасываем
+const zNorm = (s,cur) => {const u=norm(s),p=norm(zTrig(cur));return p&&u.startsWith(p+' ')?u.slice(p.length+1):u};
+function judgeZ(user,cur){
+  const u=zNorm(user,cur),c=norm(zAns(cur)),a=zAlt(cur),o=norm(cur.cs==='b'?cur.w.m:cur.w.b);
+  if(!u)return 'empty';
+  if(u===c||(a&&u===norm(a)))return 'ok';
+  // Точная форма другого падежа - ошибка падежа, даже если отличие только в ą (teściowa / teściową)
+  if(o!==c&&u===o)return 'case';
+  if(strip(u)===strip(c)||(a&&strip(u)===strip(norm(a))))return 'diac';
+  if(o!==c&&strip(u)===strip(o))return 'case';
+  return 'bad';
+}
+function zWhy(cur){
+  const tr=esc(zTrig(cur));
+  if(cur.cs==='m')return `После <b>${tr}</b> — mianownik: форма как в словаре.`;
+  const k=ZK[cur.w.t];
+  return `После <b>${tr}</b> — biernik. ${k.n}: ${k.r}.`+(/ (z|na) /.test(cur.w.m)?' Часть после <i>z / na</i> не меняется.':'');
+}
+function fbZ(res,cur,user){
+  const a=zAlt(cur);
+  const right=`<b class="ink">${zSent(cur,esc(zAns(cur)))}</b>`+(a?` <span class="muted">(можно и <i>${esc(a)}</i>)</span>`:'');
+  const why=`<div class="muted" style="margin-top:6px">${zWhy(cur)}</div>`;
+  switch(res){
+    case 'ok': return `<div class="fb ok">✓ Dobrze! ${right}${why}</div>`;
+    case 'diac': return `<div class="fb diac">Почти: проверь польские буквы. Правильно: ${right}${why}</div>`;
+    case 'case': return `<div class="fb bad">«${esc(user)}» — это ${cur.cs==='m'?'biernik':'mianownik'}. После <b>${esc(zTrig(cur))}</b> нужен ${cur.cs==='m'?'mianownik':'biernik'}: ${right}${why}</div>`;
+    case 'show': return `<div class="fb hint">Ответ: ${right}${why}</div>`;
+    default: return `<div class="fb bad">Неверно. Правильно: ${right}${why}</div>`;
+  }
+}
+function zChips(){
+  $('#zTh').innerHTML=Object.entries(BT).map(([k,t])=>`<button class="chip${Z.th.includes(k)?' on':''}" data-t="${k}">${esc(t.t)} <span style="opacity:.6">${t.w.length}</span></button>`).join('');
+  document.querySelectorAll('#zChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.z===Z.c));
+}
+$('#zTh').onclick=e=>{
+  const b=e.target.closest('.chip');if(!b)return;const k=b.dataset.t;
+  if(Z.th.includes(k)){if(Z.th.length>1)Z.th=Z.th.filter(x=>x!==k)}else Z.th.push(k);
+  store.set('plc-bt',Z.th);zChips();nextZ();
+};
+$('#zChips').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;Z.c=b.dataset.z;store.set('plc-bc',Z.c);zChips();nextZ()};
+function nextZ(){Z.cur=pickZ();renderZ()}
+function renderZ(){
+  const box=$('#zCard'),cur=Z.cur,T=BT[cur.th];Z.checked=false;Z.solved=false;
+  const score=()=>`верно <b>${Z.ok}</b> / ${Z.n} · серия <b>${Z.streak}</b>`;
+  const [pre,post]=esc(cur.fr).split('___');
+  box.innerHTML=`<div class="row" style="justify-content:space-between"><span class="score">${esc(T.t)}</span><span class="score zs">${score()}</span></div>
+    ${T.lead?`<div class="sub" style="margin:6px 0 4px">${T.lead}</div>`:''}
+    <div class="sentence">${pre}<input class="ans" style="width:12.5em;max-width:100%" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done">${post}</div>
+    <div class="sub" style="margin:4px 0 0"><span class="verb-tag">${esc(cur.w.m)}</span> ${esc(cur.w.ru)}</div>
+    <div class="fb-slot"></div>
+    <div class="actions"><button class="btn primary ck">Проверить</button><button class="btn primary nx hidden">Дальше →</button><button class="btn ghost hn">Подсказка</button><button class="btn ghost sw">Ответ</button></div>`;
+  const inp=box.querySelector('input'),slot=box.querySelector('.fb-slot'),ck=box.querySelector('.ck'),nx=box.querySelector('.nx');
+  if(matchMedia('(hover:hover)').matches)inp.focus();
+  const solved=()=>{Z.solved=true;inp.readOnly=true;box.querySelectorAll('.ck,.sw,.hn').forEach(x=>x.classList.add('hidden'));nx.classList.remove('hidden','ghost');nx.classList.add('primary');nx.focus()};
+  const next=()=>{nextZ();focusAfter(box)};
+  const go=()=>{
+    if(Z.solved){next();return}
+    if(!inp.value.trim()){inp.focus();return}
+    const res=judgeZ(inp.value,cur);
+    inp.classList.remove('ok','bad','diac');inp.classList.add(cls(res));
+    if(!Z.checked){Z.checked=true;Z.n++;if(res==='ok'){Z.ok++;Z.streak++}else Z.streak=0;box.querySelector('.zs').innerHTML=score()}
+    else if(res==='ok'){slot.innerHTML=`<div class="fb ok">✓ Теперь верно: <b class="ink">${zSent(cur,esc(zAns(cur)))}</b></div>`;solved();return}
+    slot.innerHTML=fbZ(res,cur,inp.value);
+    if(res==='ok'){solved();return}
+    // неверно: даём ввести ещё раз, в счёт идёт только первая попытка
+    box.querySelectorAll('.sw,.hn').forEach(x=>x.classList.add('hidden'));
+    ck.textContent='Проверить ещё раз';nx.classList.remove('hidden','primary');nx.classList.add('ghost');
+    inp.focus();inp.select();
+  };
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();go()}});
+  ck.onclick=go;nx.onclick=next;
+  box.querySelector('.hn').onclick=()=>{slot.innerHTML=`<div class="fb hint">${zWhy(cur)}</div>`};
+  box.querySelector('.sw').onclick=()=>{
+    Z.checked=true;Z.n++;Z.streak=0;box.querySelector('.zs').innerHTML=score();
+    inp.value=zAns(cur);inp.classList.add('diac');slot.innerHTML=fbZ('show',cur,'');solved();
+  };
+}
+
 /* ---------- ОШИБКИ ---------- */
 const E={mode:'type',ok:0,n:0,streak:0,cur:null,checked:false};
 function pickE(){
@@ -701,13 +942,14 @@ $('#wNeedChips').addEventListener('click',e=>{
 $('#wClear').addEventListener('click',()=>{$('#wText').value='';store.set('plc-text','');renderW();$('#wText').focus()});
 
 /* ---------- навигация ---------- */
-const VIEWS=['zdania','formy','tabela','bledy','sciaga','slowa'];
+const VIEWS=['zdania','formy','tabela','biernik','bledy','sciaga','slowa'];
 function route(){
   const h=location.hash.slice(1);const v=VIEWS.includes(h)?h:'zdania';
   VIEWS.forEach(x=>$('#v-'+x).classList.toggle('hidden',x!==v));
   document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.dataset.v===v));
   if(v==='bledy')renderE();
   if(v==='formy'&&!D.cur)nextD();
+  if(v==='biernik'&&!Z.cur)nextZ();
 }
 window.addEventListener('hashchange',route);
 
@@ -719,7 +961,7 @@ function updKbd(){
 new MutationObserver(updKbd).observe(document.querySelector('.wrap'),{subtree:true,childList:true,attributes:true,attributeFilter:['class','readonly']});
 
 /* ---------- старт ---------- */
-setChips();grpChips();
+setChips();grpChips();zChips();
 document.querySelectorAll('#modeChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.m===D.mode));
 tSel();renderT(rnd(VERBS).inf);renderRef();updErr();needChips();renderW();
 startSet(store.get('plc-set','7A'));
