@@ -107,6 +107,14 @@ details summary span{color:var(--muted);font-weight:400}
 .list li{margin:3px 0}
 .empty{color:var(--muted);text-align:center;padding:18px 0}
 .hidden{display:none!important}
+textarea.txt{width:100%;min-height:220px;resize:vertical;font:400 1.05rem/1.5 Inter,sans-serif;padding:12px 14px;border-radius:12px;border:2px solid var(--line);background:var(--bg);color:var(--ink);outline:none}
+textarea.txt:focus{border-color:var(--ink)}
+input.num{width:7.5em;font:600 1.15rem Inter,sans-serif;padding:10px 12px;border-radius:12px;border:2px solid var(--line);background:var(--bg);color:var(--ink);outline:none}
+input.num:focus{border-color:var(--ink)}
+.big{font-family:Fraunces,Georgia,serif;font-size:2.4rem;font-weight:700;line-height:1.1}
+.tokens{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px}
+.tokens span{background:var(--chip);border-radius:8px;padding:2px 7px;font-size:.88rem}
+.tokens span small{color:var(--muted);margin-right:4px;font-size:.7rem}
 </style>
 </head>
 <body>
@@ -120,6 +128,7 @@ details summary span{color:var(--muted);font-weight:400}
   <a href="#tabela" data-v="tabela">Таблица</a>
   <a href="#bledy" data-v="bledy">Ошибки <span id="errCount"></span></a>
   <a href="#sciaga" data-v="sciaga">Шпаргалка</a>
+  <a href="#slowa" data-v="slowa">Слова</a>
 </nav>
 
 <!-- ============ ZDANIA ============ -->
@@ -175,6 +184,43 @@ details summary span{color:var(--muted);font-weight:400}
 
 <!-- ============ SCIAGA ============ -->
 <section id="v-sciaga" class="view"><div id="ref"></div></section>
+
+<!-- ============ SLOWA ============ -->
+<section id="v-slowa" class="view">
+  <div class="card">
+    <p class="label">Текст работы</p>
+    <textarea class="txt" id="wText" lang="pl" spellcheck="true" placeholder="Wpisz albo wklej tutaj swój tekst…"></textarea>
+    <div class="actions"><button class="btn ghost" id="wClear">Очистить</button></div>
+  </div>
+  <div class="card">
+    <p class="label">Сколько слов требует задание</p>
+    <div class="row"><input type="number" class="num" id="wNeed" min="1" max="5000" inputmode="numeric"><span class="muted">слов, допуск ±10%</span></div>
+    <div class="chips" id="wNeedChips" style="margin-top:10px"></div>
+    <div id="wRes" style="margin-top:14px"></div>
+  </div>
+  <div class="card">
+    <details><summary>Что посчитано как слово <span id="wListN"></span></summary><div class="tokens" id="wList"></div></details>
+  </div>
+  <div class="card">
+    <h2>Как считают слова</h2>
+    <ul class="list">
+      <li>Считается каждое слово, в том числе предлоги, союзы и частицы из одной-двух букв: <i>w, z, i, a, o, u, się, nie</i>.</li>
+      <li>Слово через дефис — одно слово: <i>biało-czerwony, e-mail, PRL-u</i>.</li>
+      <li>Число, записанное цифрами, — одно слово: <i>2024, 8.00, 24.07.2008</i>. Число словами — сколько слов, столько и считается: <i>dwadzieścia pięć</i> = 2.</li>
+      <li>Сокращение — одно слово: <i>np., itp., ul., UE</i>.</li>
+      <li>Знаки препинания, тире, многоточие и эмодзи словами не считаются.</li>
+      <li>Слово, ошибочно написанное раздельно, считается как два: <i>na prawdę</i> = 2.</li>
+      <li>Считается весь текст в поле: обращение, подпись и заголовок тоже. Чтобы их не считать, не вставляйте их.</li>
+    </ul>
+    <h3 style="margin-top:14px">Длина на сертификационном экзамене</h3>
+    <ul class="list">
+      <li>Количество слов указано в каждом задании, например <i>(25 słów)</i> и <i>(175 słów)</i> на B1, <i>(40 słów)</i> и <i>(260 słów)</i> на B2.</li>
+      <li>Длина (<i>objętość</i>) входит в критерий «wykonanie zadania (treść, forma, objętość)». Экзаменатор записывает «liczba słów w pracy / liczba wymaganych słów» и процент.</li>
+      <li>В образцах оценённых работ B2 допустимое отклонение — ±10%, в B1 — около 20 слов. Слишком короткая работа теряет баллы.</li>
+    </ul>
+    <p class="muted" style="font-size:.85rem;margin:10px 0 0">Источники: образцы и экзаменационные листы на <a href="https://certyfikatpolski.pl/" target="_blank" rel="noopener">certyfikatpolski.pl</a>. Сертификационная комиссия не публикует правил подсчёта отдельных слов, поэтому правила выше следуют общепринятой практике польских экзаменов (CKE).</p>
+  </div>
+</section>
 </div>
 
 <div class="kbd" id="kbd"></div>
@@ -370,14 +416,18 @@ const cls = r => r==='ok'?'ok':(r==='diac'||r==='sie')?'diac':'bad';
 /* ---------- польская клавиатура ---------- */
 let lastInput=null;
 $('#kbd').innerHTML='ąćęłńóśźż'.split('').map(c=>`<button type="button" data-c="${c}">${c}</button>`).join('');
-document.addEventListener('focusin',e=>{if(e.target.matches('input.ans'))lastInput=e.target});
+// Поля, куда кнопки вставляют польские буквы: ответы и текст в «Словах»
+const TYPE_SEL='input.ans,textarea.txt';
+document.addEventListener('focusin',e=>{if(e.target.matches(TYPE_SEL))lastInput=e.target});
 $('#kbd').addEventListener('pointerdown',e=>{
   const b=e.target.closest('button');if(!b)return;e.preventDefault();
-  const el=lastInput&&document.body.contains(lastInput)?lastInput:document.querySelector('.view:not(.hidden) input.ans:not([readonly])');
+  const el=lastInput&&document.body.contains(lastInput)&&!lastInput.closest('.view.hidden')?lastInput:document.querySelector('.view:not(.hidden) :is(input.ans,textarea.txt):not([readonly])');
   if(!el||el.readOnly)return;
   const s=el.selectionStart??el.value.length,en=el.selectionEnd??el.value.length;
   el.value=el.value.slice(0,s)+b.dataset.c+el.value.slice(en);
   el.focus();el.setSelectionRange(s+1,s+1);
+  // Сообщаем об изменении, чтобы счётчик слов обновился
+  el.dispatchEvent(new Event('input',{bubbles:true}));
 });
 
 /* ---------- ПРЕДЛОЖЕНИЯ ---------- */
@@ -612,8 +662,46 @@ function renderRef(){
   }).join('');
 }
 
+/* ---------- СЛОВА: подсчёт слов в тексте ---------- */
+// Слово - любая группа знаков между пробелами, в которой есть буква или цифра.
+// Поэтому "e-mail", "np.", "2024" - одно слово, а "–", "..." - ни одного.
+const words = t => t.split(/\s+/).filter(w=>/[\p{L}\p{N}]/u.test(w));
+// Русское склонение: 1 слово, 2 слова, 5 слов
+const plural = (n,one,few,many) => {const a=n%10,b=n%100;return a===1&&b!==11?one:a>=2&&a<=4&&(b<12||b>14)?few:many};
+const slow = n => n+' '+plural(n,'слово','слова','слов');
+const NEEDS=[25,30,40,100,150,160,170,175,200,260,270];
+const W={need:store.get('plc-need',175)};
+function needChips(){
+  $('#wNeedChips').innerHTML=NEEDS.map(n=>`<button class="chip${n===W.need?' on':''}" data-n="${n}">${n}</button>`).join('');
+}
+function renderW(){
+  const t=$('#wText').value, ws=words(t), n=ws.length, need=W.need;
+  const chars=t.replace(/\s/g,'').length;
+  let html=`<div class="big">${slow(n)}</div><div class="muted">${chars} знаков без пробелов</div>`;
+  if(need>0){
+    const lo=Math.ceil(need*0.9), hi=Math.floor(need*1.1), pct=Math.round(n*100/need);
+    html+=`<div class="muted" style="margin-top:4px">${n} / ${need} — ${pct}%</div>`;
+    if(!n){/* пустой текст: без оценки */}
+    else if(n<lo) html+=`<div class="fb diac">Мало: не хватает ${slow(lo-n)} до минимума ${lo} (норма ${lo}–${hi}).</div>`;
+    else if(n>hi) html+=`<div class="fb bad">Много: на ${slow(n-hi)} больше максимума ${hi} (норма ${lo}–${hi}).</div>`;
+    else html+=`<div class="fb ok">✓ В норме: ${lo}–${hi} слов.</div>`;
+  }
+  $('#wRes').innerHTML=html;
+  $('#wListN').textContent=n?'· '+n:'';
+  $('#wList').innerHTML=ws.map((w,i)=>`<span><small>${i+1}</small>${esc(w)}</span>`).join('');
+}
+$('#wText').value=store.get('plc-text','');
+$('#wNeed').value=W.need;
+$('#wText').addEventListener('input',()=>{store.set('plc-text',$('#wText').value);renderW()});
+$('#wNeed').addEventListener('input',()=>{const v=parseInt($('#wNeed').value,10);W.need=v>0?v:0;store.set('plc-need',W.need);needChips();renderW()});
+$('#wNeedChips').addEventListener('click',e=>{
+  const c=e.target.closest('.chip');if(!c)return;
+  W.need=+c.dataset.n;$('#wNeed').value=W.need;store.set('plc-need',W.need);needChips();renderW();
+});
+$('#wClear').addEventListener('click',()=>{$('#wText').value='';store.set('plc-text','');renderW();$('#wText').focus()});
+
 /* ---------- навигация ---------- */
-const VIEWS=['zdania','formy','tabela','bledy','sciaga'];
+const VIEWS=['zdania','formy','tabela','bledy','sciaga','slowa'];
 function route(){
   const h=location.hash.slice(1);const v=VIEWS.includes(h)?h:'zdania';
   VIEWS.forEach(x=>$('#v-'+x).classList.toggle('hidden',x!==v));
@@ -625,7 +713,7 @@ window.addEventListener('hashchange',route);
 
 /* ---------- клавиатура только там, где есть поле ввода ---------- */
 function updKbd(){
-  const on=!!document.querySelector('.view:not(.hidden) input.ans:not([readonly])');
+  const on=!!document.querySelector('.view:not(.hidden) :is(input.ans,textarea.txt):not([readonly])');
   $('#kbd').classList.toggle('hide',!on);document.body.classList.toggle('has-kbd',on);
 }
 new MutationObserver(updKbd).observe(document.querySelector('.wrap'),{subtree:true,childList:true,attributes:true,attributeFilter:['class','readonly']});
@@ -633,7 +721,7 @@ new MutationObserver(updKbd).observe(document.querySelector('.wrap'),{subtree:tr
 /* ---------- старт ---------- */
 setChips();grpChips();
 document.querySelectorAll('#modeChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.m===D.mode));
-tSel();renderT(rnd(VERBS).inf);renderRef();updErr();
+tSel();renderT(rnd(VERBS).inf);renderRef();updErr();needChips();renderW();
 startSet(store.get('plc-set','7A'));
 route();
 if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
