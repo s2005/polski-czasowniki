@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f6f3ee" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16130f" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Ile słów?">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<title>Ile słów?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f3ee; --card:#fffdf9; --ink:#1f1c19; --muted:#6f675e; --line:#e4ddd3;
+  --accent:#2c4a7a; --accent-soft:#e3ebf7; --on-accent:#ffffff; --ok:#1f7a4d; --ok-soft:#e3f3ea;
+  --warn:#a15c00; --warn-soft:#fdf0dc; --bad:#b3261e; --bad-soft:#fbe6e4;
+  --chip:#efe9e0; --radius:14px;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#16130f; --card:#211d18; --ink:#f1ece4; --muted:#a79e92; --line:#3a332b;
+    --accent:#9db9ea; --accent-soft:#1f2b3f; --on-accent:#10213d; --ok:#5cc98f; --ok-soft:#173326;
+    --warn:#f0b25a; --warn-soft:#3a2b14; --bad:#ff7b72; --bad-soft:#3b1d1b; --chip:#2c2620;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%}
+.wrap{max-width:720px;margin:0 auto;padding:16px 14px 32px}
+body.has-kbd .wrap{padding-bottom:110px}
+header h1{font-family:Fraunces,Georgia,serif;font-size:1.7rem;margin:6px 0 2px;letter-spacing:-.01em}
+header p{margin:0;color:var(--muted);font-size:.92rem}
+nav{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0 8px;margin:10px 0 6px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav a{flex:0 0 auto;text-decoration:none;color:var(--ink);background:var(--chip);padding:9px 14px;border-radius:999px;font-weight:600;font-size:.92rem;white-space:nowrap}
+nav a.on{background:var(--ink);color:var(--bg)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 16px;margin:12px 0}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 13px;font:600 .88rem Inter,sans-serif;cursor:pointer}
+.chip.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.label{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin:0 0 6px}
+.btn{border:0;border-radius:12px;padding:13px 18px;font:600 1rem Inter,sans-serif;cursor:pointer;background:var(--chip);color:var(--ink);min-height:48px}
+.btn.primary{background:var(--accent);color:var(--on-accent)}
+.btn.ghost{background:transparent;border:1px solid var(--line)}
+.btn:disabled{opacity:.45}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.actions .btn.primary{flex:1 1 160px}
+.score{font-size:.9rem;color:var(--muted)}
+.score b{color:var(--ink)}
+.prompt{font-family:Fraunces,Georgia,serif;font-size:2rem;font-weight:700;margin:4px 0 0;line-height:1.2}
+.prompt .pron{color:var(--accent)}
+.sub{color:var(--muted);margin:2px 0 14px}
+input.ans{width:100%;font:500 1.25rem Inter,sans-serif;padding:13px 14px;border-radius:12px;border:2px solid var(--line);background:var(--bg);color:var(--ink);outline:none}
+input.ans:focus{border-color:var(--ink)}
+input.ans.ok{border-color:var(--ok);background:var(--ok-soft)}
+input.ans.diac{border-color:var(--warn);background:var(--warn-soft)}
+input.ans.bad{border-color:var(--bad);background:var(--bad-soft)}
+.sentence{font-size:1.2rem;line-height:2.4}
+.sentence input.ans{display:inline-block;width:9.5em;font-size:1.1rem;padding:6px 10px;margin:0 2px;vertical-align:middle}
+.verb-tag{display:inline-block;background:var(--chip);border-radius:8px;padding:1px 8px;font-size:.95rem;color:var(--muted)}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.choices button{font:600 1.15rem Inter,sans-serif;padding:15px 8px;border-radius:12px;border:2px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.choices button.ok{border-color:var(--ok);background:var(--ok-soft)}
+.choices button.bad{border-color:var(--bad);background:var(--bad-soft)}
+.fb{margin-top:14px;padding:12px 14px;border-radius:12px;font-size:.97rem}
+.fb.ok{background:var(--ok-soft);color:var(--ok)}
+.fb.diac{background:var(--warn-soft);color:var(--warn)}
+.fb.bad{background:var(--bad-soft);color:var(--bad)}
+.fb.hint{background:var(--chip);color:var(--ink)}
+.fb b{font-weight:700}
+.fb .ink{color:var(--ink)}
+table.conj{border-collapse:collapse;width:100%;margin-top:10px;font-size:.98rem}
+table.conj td{padding:6px 8px;border-top:1px solid var(--line)}
+table.conj td:first-child{color:var(--muted);width:38%}
+table.conj tr.target td{background:var(--accent-soft);font-weight:700}
+table.conj tr.target td:first-child{color:var(--ink)}
+table.conj tr.yours td{text-decoration:line-through;text-decoration-color:var(--bad)}
+.end{color:var(--accent);font-weight:700}
+.kbd{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--card);border-top:1px solid var(--line);padding:8px 8px calc(8px + env(safe-area-inset-bottom));display:flex;justify-content:center;gap:5px}
+.kbd button{flex:1 1 0;max-width:52px;min-height:44px;font:600 1.15rem Inter,sans-serif;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;padding:0}
+.kbd.hide{display:none}
+select{font:500 1rem Inter,sans-serif;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);max-width:100%;flex:1 1 200px}
+.grid6{display:grid;grid-template-columns:auto 1fr;gap:8px 10px;align-items:center;margin-top:12px}
+.grid6 .p{color:var(--muted);font-weight:600}
+.grid6 .fix{grid-column:2;font-size:.9rem;color:var(--bad);margin-top:-4px}
+.grid6 input.ans{font-size:1.1rem;padding:10px 12px}
+.progress{height:6px;background:var(--chip);border-radius:9px;overflow:hidden;margin:4px 0 14px}
+.progress i{display:block;height:100%;background:var(--accent);transition:width .25s}
+h2{font-family:Fraunces,Georgia,serif;font-size:1.25rem;margin:0 0 6px}
+h3{font-size:1rem;margin:0 0 4px}
+details{border-top:1px solid var(--line);padding:8px 0}
+details summary{cursor:pointer;font-weight:600;list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary span{color:var(--muted);font-weight:400}
+.ends{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}
+.ends div{background:var(--chip);border-radius:10px;padding:7px 8px;font-size:.88rem}
+.ends div small{display:block;color:var(--muted);font-size:.75rem}
+.muted{color:var(--muted)}
+.list{margin:0;padding-left:18px}
+.list li{margin:3px 0}
+.empty{color:var(--muted);text-align:center;padding:18px 0}
+.hidden{display:none!important}
+textarea.txt{width:100%;min-height:220px;resize:vertical;font:400 1.05rem/1.5 Inter,sans-serif;padding:12px 14px;border-radius:12px;border:2px solid var(--line);background:var(--bg);color:var(--ink);outline:none}
+textarea.txt:focus{border-color:var(--ink)}
+input.num{width:7.5em;font:600 1.15rem Inter,sans-serif;padding:10px 12px;border-radius:12px;border:2px solid var(--line);background:var(--bg);color:var(--ink);outline:none}
+input.num:focus{border-color:var(--ink)}
+.big{font-family:Fraunces,Georgia,serif;font-size:2.4rem;font-weight:700;line-height:1.1}
+.tokens{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px}
+.tokens span{background:var(--chip);border-radius:8px;padding:2px 7px;font-size:.88rem}
+.tokens span small{color:var(--muted);margin-right:4px;font-size:.7rem}
+</style>
+<style>.install{margin-top:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 14px;font:600 .88rem Inter,sans-serif;cursor:pointer}</style>
+</head>
+<body class="has-kbd">
+<div class="wrap">
+<header>
+  <h1>Ile słów?</h1>
+  <p>Подсчёт слов в письменной работе по правилам экзамена</p>
+  <button class="install hidden" id="installBtn">⤓ Установить как приложение</button>
+</header>
+<!-- ============ SLOWA ============ -->
+<section id="v-slowa">
+  <div class="card">
+    <p class="label">Текст работы</p>
+    <textarea class="txt" id="wText" lang="pl" spellcheck="true" placeholder="Wpisz albo wklej tutaj swój tekst…"></textarea>
+    <div class="actions"><button class="btn ghost" id="wClear">Очистить</button></div>
+  </div>
+  <div class="card">
+    <p class="label">Сколько слов требует задание</p>
+    <div class="row"><input type="number" class="num" id="wNeed" min="1" max="5000" inputmode="numeric"><span class="muted">слов, допуск ±10%</span></div>
+    <div class="chips" id="wNeedChips" style="margin-top:10px"></div>
+    <div id="wRes" style="margin-top:14px"></div>
+  </div>
+  <div class="card">
+    <details><summary>Что посчитано как слово <span id="wListN"></span></summary><div class="tokens" id="wList"></div></details>
+  </div>
+  <div class="card">
+    <h2>Как считают слова</h2>
+    <ul class="list">
+      <li>Считается каждое слово, в том числе предлоги, союзы и частицы из одной-двух букв: <i>w, z, i, a, o, u, się, nie</i>.</li>
+      <li>Слово через дефис — одно слово: <i>biało-czerwony, e-mail, PRL-u</i>.</li>
+      <li>Число, записанное цифрами, — одно слово: <i>2024, 8.00, 24.07.2008</i>. Число словами — сколько слов, столько и считается: <i>dwadzieścia pięć</i> = 2.</li>
+      <li>Сокращение — одно слово: <i>np., itp., ul., UE</i>.</li>
+      <li>Знаки препинания, тире, многоточие и эмодзи словами не считаются.</li>
+      <li>Слово, ошибочно написанное раздельно, считается как два: <i>na prawdę</i> = 2.</li>
+      <li>Считается весь текст в поле: обращение, подпись и заголовок тоже. Чтобы их не считать, не вставляйте их.</li>
+    </ul>
+    <h3 style="margin-top:14px">Длина на сертификационном экзамене</h3>
+    <ul class="list">
+      <li>Количество слов указано в каждом задании, например <i>(25 słów)</i> и <i>(175 słów)</i> на B1, <i>(40 słów)</i> и <i>(260 słów)</i> на B2.</li>
+      <li>Длина (<i>objętość</i>) входит в критерий «wykonanie zadania (treść, forma, objętość)». Экзаменатор записывает «liczba słów w pracy / liczba wymaganych słów» и процент.</li>
+      <li>Допустимое отклонение от указанного количества слов — ±10%, на любом уровне. Слишком короткая работа теряет баллы.</li>
+    </ul>
+    <p class="muted" style="font-size:.85rem;margin:10px 0 0">Источники: образцы и экзаменационные листы на <a href="https://certyfikatpolski.pl/" target="_blank" rel="noopener">certyfikatpolski.pl</a>. Сертификационная комиссия не публикует правил подсчёта отдельных слов, поэтому правила выше следуют общепринятой практике польских экзаменов (CKE).</p>
+  </div>
+</section>
+</div>
+
+<div class="kbd" id="kbd"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const store = {
+  get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+};
+
+/* ---------- польская клавиатура ---------- */
+let lastInput=null;
+$('#kbd').innerHTML='ąćęłńóśźż'.split('').map(c=>`<button type="button" data-c="${c}">${c}</button>`).join('');
+document.addEventListener('focusin',e=>{if(e.target.matches('textarea.txt'))lastInput=e.target});
+$('#kbd').addEventListener('pointerdown',e=>{
+  const b=e.target.closest('button');if(!b)return;e.preventDefault();
+  const el=lastInput||$('#wText');
+  const s=el.selectionStart??el.value.length,en=el.selectionEnd??el.value.length;
+  el.value=el.value.slice(0,s)+b.dataset.c+el.value.slice(en);
+  el.focus();el.setSelectionRange(s+1,s+1);
+  el.dispatchEvent(new Event('input',{bubbles:true}));
+});
+
+/* ---------- СЛОВА: подсчёт слов в тексте ---------- */
+// Слово - любая группа знаков между пробелами, в которой есть буква или цифра.
+// Поэтому "e-mail", "np.", "2024" - одно слово, а "–", "..." - ни одного.
+const words = t => t.split(/\s+/).filter(w=>/[\p{L}\p{N}]/u.test(w));
+// Русское склонение: 1 слово, 2 слова, 5 слов
+const plural = (n,one,few,many) => {const a=n%10,b=n%100;return a===1&&b!==11?one:a>=2&&a<=4&&(b<12||b>14)?few:many};
+const slow = n => n+' '+plural(n,'слово','слова','слов');
+const NEEDS=[25,30,40,100,150,160,170,175,200,260,270];
+const W={need:store.get('plc-need',175)};
+function needChips(){
+  $('#wNeedChips').innerHTML=NEEDS.map(n=>`<button class="chip${n===W.need?' on':''}" data-n="${n}">${n}</button>`).join('');
+}
+function renderW(){
+  const t=$('#wText').value, ws=words(t), n=ws.length, need=W.need;
+  const chars=t.replace(/\s/g,'').length;
+  let html=`<div class="big">${slow(n)}</div><div class="muted">${chars} знаков без пробелов</div>`;
+  if(need>0){
+    const lo=Math.ceil(need*0.9), hi=Math.floor(need*1.1), pct=Math.round(n*100/need);
+    html+=`<div class="muted" style="margin-top:4px">${n} / ${need} — ${pct}%</div>`;
+    if(!n){/* пустой текст: без оценки */}
+    else if(n<lo) html+=`<div class="fb diac">Мало: не хватает ${slow(lo-n)} до минимума ${lo} (норма ${lo}–${hi}).</div>`;
+    else if(n>hi) html+=`<div class="fb bad">Много: на ${slow(n-hi)} больше максимума ${hi} (норма ${lo}–${hi}).</div>`;
+    else html+=`<div class="fb ok">✓ В норме: ${lo}–${hi} слов.</div>`;
+  }
+  $('#wRes').innerHTML=html;
+  $('#wListN').textContent=n?'· '+n:'';
+  $('#wList').innerHTML=ws.map((w,i)=>`<span><small>${i+1}</small>${esc(w)}</span>`).join('');
+}
+$('#wText').value=store.get('plc-text','');
+$('#wNeed').value=W.need;
+$('#wText').addEventListener('input',()=>{store.set('plc-text',$('#wText').value);renderW()});
+$('#wNeed').addEventListener('input',()=>{const v=parseInt($('#wNeed').value,10);W.need=v>0?v:0;store.set('plc-need',W.need);needChips();renderW()});
+$('#wNeedChips').addEventListener('click',e=>{
+  const c=e.target.closest('.chip');if(!c)return;
+  W.need=+c.dataset.n;$('#wNeed').value=W.need;store.set('plc-need',W.need);needChips();renderW();
+});
+$('#wClear').addEventListener('click',()=>{$('#wText').value='';store.set('plc-text','');renderW();$('#wText').focus()});
+
+
+needChips();renderW();
+
+/* ---------- приложение для компьютера (Claude Desktop) ---------- */
+function appIcon(){
+  const c=document.createElement('canvas');c.width=c.height=256;const x=c.getContext('2d');
+  x.fillStyle='#c8102e';x.fillRect(0,0,256,256);
+  x.fillStyle='#fff';x.textAlign='center';x.textBaseline='middle';
+  x.font='italic 700 118px Georgia, "Times New Roman", serif';x.fillText('Sł',128,116);
+  x.beginPath();x.roundRect?x.roundRect(77,190,102,13,6):x.rect(77,190,102,13);x.fill();
+  return c.toDataURL('image/png');
+}
+(async()=>{
+  try{
+    if(!window.claude||typeof claude.use!=='function')return;
+    const d=await claude.use('desktop');if(!d)return;
+    if(d.window){d.app.dock.setIcon(appIcon()).catch(()=>{});return}
+    if((await d.install.state())==='available'){
+      const b=$('#installBtn');b.classList.remove('hidden');
+      b.onclick=()=>d.install.request().then(r=>{if(r==='installed')b.classList.add('hidden')}).catch(()=>{});
+    }
+  }catch(e){}
+})();
+if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
+</script>
+</body>
+</html>

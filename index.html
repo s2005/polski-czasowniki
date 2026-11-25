@@ -7,12 +7,12 @@
 <meta name="theme-color" content="#16130f" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Czasowniki">
+<meta name="apple-mobile-web-app-title" content="Ćwiczenia">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
-<title>Czasowniki – тренажёр спряжения</title>
+<title>Ćwiczenia z polskiego</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -81,6 +81,7 @@ table.conj td{padding:6px 8px;border-top:1px solid var(--line)}
 table.conj td:first-child{color:var(--muted);width:38%}
 table.conj tr.target td{background:var(--accent-soft);font-weight:700}
 table.conj tr.target td:first-child{color:var(--ink)}
+table.stat{border-collapse:collapse;width:100%;font-size:.95rem}table.stat td,table.stat th{padding:6px 8px;border-top:1px solid var(--line);text-align:left}table.stat th{color:var(--muted);font-weight:600;font-size:.8rem;border-top:0}
 table.conj tr.yours td{text-decoration:line-through;text-decoration-color:var(--bad)}
 .end{color:var(--accent);font-weight:700}
 .kbd{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--card);border-top:1px solid var(--line);padding:8px 8px calc(8px + env(safe-area-inset-bottom));display:flex;justify-content:center;gap:5px}
@@ -107,29 +108,22 @@ details summary span{color:var(--muted);font-weight:400}
 .list li{margin:3px 0}
 .empty{color:var(--muted);text-align:center;padding:18px 0}
 .hidden{display:none!important}
-textarea.txt{width:100%;min-height:220px;resize:vertical;font:400 1.05rem/1.5 Inter,sans-serif;padding:12px 14px;border-radius:12px;border:2px solid var(--line);background:var(--bg);color:var(--ink);outline:none}
-textarea.txt:focus{border-color:var(--ink)}
-input.num{width:7.5em;font:600 1.15rem Inter,sans-serif;padding:10px 12px;border-radius:12px;border:2px solid var(--line);background:var(--bg);color:var(--ink);outline:none}
-input.num:focus{border-color:var(--ink)}
-.big{font-family:Fraunces,Georgia,serif;font-size:2.4rem;font-weight:700;line-height:1.1}
-.tokens{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px}
-.tokens span{background:var(--chip);border-radius:8px;padding:2px 7px;font-size:.88rem}
-.tokens span small{color:var(--muted);margin-right:4px;font-size:.7rem}
+.install{margin-top:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 14px;font:600 .88rem Inter,sans-serif;cursor:pointer}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header>
-  <h1>Czasowniki w czasie teraźniejszym</h1>
+  <h1>Ćwiczenia z polskiego</h1>
+  <button class="install hidden" id="installBtn">⤓ Установить как приложение</button>
 </header>
 <nav id="nav">
   <a href="#zdania" data-v="zdania">Предложения</a>
   <a href="#formy" data-v="formy">Формы</a>
   <a href="#tabela" data-v="tabela">Таблица</a>
-  <a href="#biernik" data-v="biernik">Biernik</a>
+  <a href="#biernik" data-v="biernik">Винительный</a>
   <a href="#bledy" data-v="bledy">Ошибки <span id="errCount"></span></a>
   <a href="#sciaga" data-v="sciaga">Шпаргалка</a>
-  <a href="#slowa" data-v="slowa">Слова</a>
 </nav>
 
 <!-- ============ ZDANIA ============ -->
@@ -163,6 +157,7 @@ input.num:focus{border-color:var(--ink)}
       <button class="chip on" data-m="type">Ввод</button>
       <button class="chip" data-m="choice">Выбор из 4</button>
     </div>
+    <div class="actions" style="margin-top:12px"><button class="btn ghost" id="resetDone">Сбросить прогресс выбранных групп</button></div>
   </div>
   <div class="card" id="dCard"></div>
 </section>
@@ -184,14 +179,15 @@ input.num:focus{border-color:var(--ink)}
     <div class="chips" id="zTh"></div>
     <p class="label" style="margin-top:14px">Падеж</p>
     <div class="chips" id="zChips">
-      <button class="chip" data-z="mix">Вперемешку</button>
-      <button class="chip" data-z="b">только biernik</button>
-      <button class="chip" data-z="m">только mianownik</button>
+      <button class="chip" data-z="mix">Оба падежа</button>
+      <button class="chip" data-z="b">Винительный (biernik)</button>
+      <button class="chip" data-z="m">Именительный (mianownik)</button>
     </div>
-    <details style="margin-top:12px"><summary>Правило <span>· mianownik / biernik</span></summary>
-      <h3 style="margin-top:10px"><span class="end">Mianownik</span> — форма как в словаре</h3>
+    <div class="actions" style="margin-top:12px"><button class="btn ghost" id="zReset">Сбросить прогресс выбранных тем</button></div>
+    <details style="margin-top:12px"><summary>Правило <span>· именительный и винительный падеж</span></summary>
+      <h3 style="margin-top:10px"><span class="end">Именительный</span> (mianownik) — кто? что? форма как в словаре</h3>
       <p class="muted" style="margin:0">После <i>to jest, tu jest, gdzie jest, dla mnie</i>: To jest <b>kawa</b>. Gdzie jest <b>brat</b>? Dla mnie <b>kurczak z frytkami</b>.</p>
-      <h3 style="margin-top:10px"><span class="end">Biernik</span> — кого? что? после глагола</h3>
+      <h3 style="margin-top:10px"><span class="end">Винительный</span> (biernik) — кого? что? после глагола</h3>
       <p class="muted" style="margin:0">После <i>mam, lubię, kocham, kupuję, biorę, widzę, oglądam, czytam, piszę, znam, proszę, czekam na</i>: Mam <b>brata</b>. Kupuję <b>kawę</b>. Proszę <b>kurczaka z frytkami</b>. Czekam na <b>autobus</b>.</p>
       <table class="conj">
         <tr><td>женский род на -a</td><td>kawa → kaw<b>ę</b>, zupa pomidorowa → zup<b>ę</b> pomidorow<b>ą</b>, teściowa → teściow<b>ą</b></td></tr>
@@ -209,50 +205,16 @@ input.num:focus{border-color:var(--ink)}
 
 <!-- ============ BLEDY ============ -->
 <section id="v-bledy" class="view">
+  <p class="score" id="syncState" style="margin:4px 2px"></p>
   <div class="card hidden" id="eKind"><p class="label">Что повторять</p><div class="chips" id="eKinds"></div></div>
   <div class="card" id="eCard"></div>
   <div class="card" id="eList"></div>
+  <div class="card" id="eStats"></div>
 </section>
 
 <!-- ============ SCIAGA ============ -->
 <section id="v-sciaga" class="view"><div id="ref"></div></section>
 
-<!-- ============ SLOWA ============ -->
-<section id="v-slowa" class="view">
-  <div class="card">
-    <p class="label">Текст работы</p>
-    <textarea class="txt" id="wText" lang="pl" spellcheck="true" placeholder="Wpisz albo wklej tutaj swój tekst…"></textarea>
-    <div class="actions"><button class="btn ghost" id="wClear">Очистить</button></div>
-  </div>
-  <div class="card">
-    <p class="label">Сколько слов требует задание</p>
-    <div class="row"><input type="number" class="num" id="wNeed" min="1" max="5000" inputmode="numeric"><span class="muted">слов, допуск ±10%</span></div>
-    <div class="chips" id="wNeedChips" style="margin-top:10px"></div>
-    <div id="wRes" style="margin-top:14px"></div>
-  </div>
-  <div class="card">
-    <details><summary>Что посчитано как слово <span id="wListN"></span></summary><div class="tokens" id="wList"></div></details>
-  </div>
-  <div class="card">
-    <h2>Как считают слова</h2>
-    <ul class="list">
-      <li>Считается каждое слово, в том числе предлоги, союзы и частицы из одной-двух букв: <i>w, z, i, a, o, u, się, nie</i>.</li>
-      <li>Слово через дефис — одно слово: <i>biało-czerwony, e-mail, PRL-u</i>.</li>
-      <li>Число, записанное цифрами, — одно слово: <i>2024, 8.00, 24.07.2008</i>. Число словами — сколько слов, столько и считается: <i>dwadzieścia pięć</i> = 2.</li>
-      <li>Сокращение — одно слово: <i>np., itp., ul., UE</i>.</li>
-      <li>Знаки препинания, тире, многоточие и эмодзи словами не считаются.</li>
-      <li>Слово, ошибочно написанное раздельно, считается как два: <i>na prawdę</i> = 2.</li>
-      <li>Считается весь текст в поле: обращение, подпись и заголовок тоже. Чтобы их не считать, не вставляйте их.</li>
-    </ul>
-    <h3 style="margin-top:14px">Длина на сертификационном экзамене</h3>
-    <ul class="list">
-      <li>Количество слов указано в каждом задании, например <i>(25 słów)</i> и <i>(175 słów)</i> на B1, <i>(40 słów)</i> и <i>(260 słów)</i> на B2.</li>
-      <li>Длина (<i>objętość</i>) входит в критерий «wykonanie zadania (treść, forma, objętość)». Экзаменатор записывает «liczba słów w pracy / liczba wymaganych słów» и процент.</li>
-      <li>Допустимое отклонение от указанного количества слов — ±10%, на любом уровне. Слишком короткая работа теряет баллы.</li>
-    </ul>
-    <p class="muted" style="font-size:.85rem;margin:10px 0 0">Источники: образцы и экзаменационные листы на <a href="https://certyfikatpolski.pl/" target="_blank" rel="noopener">certyfikatpolski.pl</a>. Сертификационная комиссия не публикует правил подсчёта отдельных слов, поэтому правила выше следуют общепринятой практике польских экзаменов (CKE).</p>
-  </div>
-</section>
 </div>
 
 <div class="kbd" id="kbd"></div>
@@ -407,13 +369,17 @@ const store = {
 
 /* ---------- ошибки ---------- */
 let MIST = store.get('plc-mist',{});
-function addMist(inf,p){const k=inf+'|'+p;MIST[k]=(MIST[k]||0)+1;store.set('plc-mist',MIST);updErr()}
-function okMist(inf,p){const k=inf+'|'+p;if(MIST[k]){MIST[k]--;if(MIST[k]<=0)delete MIST[k];store.set('plc-mist',MIST);updErr()}}
-// Ошибки в «Biernik»: ключ тема|слово|падеж (b или m)
+let DONE = store.get('plc-done',{forms:{},sent:{},words:{}});
+if(!DONE.forms)DONE={forms:{},sent:{},words:{}};
+if(!DONE.words)DONE.words={};
+function saveDone(){store.set('plc-done',DONE);syncDone()}
+function addMist(inf,p){const k=inf+'|'+p;delete DONE.forms[k];saveDone();MIST[k]=(MIST[k]||0)+1;store.set('plc-mist',MIST);updErr();syncMist()}
+function okMist(inf,p){const k=inf+'|'+p;if(!MIST[k]&&!DONE.forms[k]){DONE.forms[k]=1;saveDone()}if(MIST[k]){MIST[k]--;if(MIST[k]<=0){delete MIST[k];DONE.forms[k]=1;saveDone()}store.set('plc-mist',MIST);updErr();syncMist()}}
+// Ошибки в «Винительном»: ключ тема|слово|падеж (b или m)
 let MISTB = store.get('plc-bmist',{});
 const bKey = cur => cur.th+'|'+cur.w.m+'|'+cur.cs;
-function addMistB(cur){const k=bKey(cur);MISTB[k]=(MISTB[k]||0)+1;store.set('plc-bmist',MISTB);updErr()}
-function okMistB(cur){const k=bKey(cur);if(MISTB[k]){MISTB[k]--;if(MISTB[k]<=0)delete MISTB[k];store.set('plc-bmist',MISTB);updErr()}}
+function addMistB(cur){const k=bKey(cur);delete DONE.words[k];saveDone();MISTB[k]=(MISTB[k]||0)+1;store.set('plc-bmist',MISTB);updErr();syncMist()}
+function okMistB(cur){const k=bKey(cur);if(!MISTB[k]&&!DONE.words[k]){DONE.words[k]=1;saveDone()}if(MISTB[k]){MISTB[k]--;if(MISTB[k]<=0){delete MISTB[k];DONE.words[k]=1;saveDone()}store.set('plc-bmist',MISTB);updErr();syncMist()}}
 function updErr(){const n=Object.keys(MIST).length+Object.keys(MISTB).length;$('#errCount').textContent=n?'· '+n:''}
 
 /* ---------- проверка ---------- */
@@ -469,20 +435,43 @@ $('#kbd').addEventListener('pointerdown',e=>{
 
 /* ---------- ПРЕДЛОЖЕНИЯ ---------- */
 const S={set:null,queue:[],i:0,ok:0,done:0,checked:false};
+const ALLS=SETS.flatMap(s=>s.items.map((it,k)=>({it,lab:s.t+' · '+(k+1),key:s.id+'|'+k})));
+const setItems=id=>id==='MIX'?ALLS:ALLS.filter(x=>x.key.startsWith(id+'|'));
+const solvedOf=id=>setItems(id).filter(x=>DONE.sent[x.key]).length;
 function setChips(){
-  const all=[...SETS.map(s=>`<button class="chip" data-s="${s.id}">${esc(s.t)}</button>`),`<button class="chip" data-s="MIX">Всё вперемешку</button>`];
-  $('#setChips').innerHTML=all.join('');
-  $('#setChips').onclick=e=>{const b=e.target.closest('.chip');if(b)startSet(b.dataset.s)};
+  const lab=(id,t)=>{const n=setItems(id).length,d=solvedOf(id);return `${esc(t)} <small style="opacity:.75">${d===n?'✓':d+'/'+n}</small>`};
+  $('#setChips').innerHTML=[...SETS.map(s=>`<button class="chip ${S.set===s.id?'on':''}" data-s="${s.id}">${lab(s.id,s.t)}</button>`),
+    `<button class="chip ${S.set==='MIX'?'on':''}" data-s="MIX">${lab('MIX','Все наборы')}</button>`].join('');
 }
+$('#setChips').onclick=e=>{const b=e.target.closest('.chip');if(b)startSet(b.dataset.s)};
+function setName(id){return id==='MIX'?'Все наборы':(SETS.find(x=>x.id===id)||{}).t}
 function startSet(id){
-  let items;
-  if(id==='MIX') items=shuffle(SETS.flatMap(s=>s.items.map((it,k)=>({it,lab:s.t+' · '+(k+1)}))));
-  else {const s=SETS.find(x=>x.id===id);items=s.items.map((it,k)=>({it,lab:s.t+' · '+(k+1)}))}
+  let items=setItems(id).filter(x=>!DONE.sent[x.key]);
+  if(id==='MIX')items=shuffle(items);
   Object.assign(S,{set:id,queue:items,i:0,ok:0,done:0,wrong:[]});
-  store.set('plc-set',id);
-  document.querySelectorAll('#setChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.s===id));
+  store.set('plc-set',id);setChips();
+  if(!items.length){showSetDone(id);return}
   $('#sDone').classList.add('hidden');$('#sCard').classList.remove('hidden');
   renderS();
+}
+function twoClick(btn,label,action){
+  btn.onclick=()=>{
+    if(!btn.dataset.sure){btn.dataset.sure='1';btn.textContent='Точно? Нажми ещё раз';setTimeout(()=>{delete btn.dataset.sure;btn.textContent=label},4000);return}
+    delete btn.dataset.sure;btn.textContent=label;action();
+  };
+}
+function showSetDone(id){
+  const n=setItems(id).length;
+  $('#sCard').classList.add('hidden');$('#sDone').classList.remove('hidden');
+  $('#sDone').innerHTML=`<h2>✓ ${esc(setName(id))}: решено ${n} из ${n}</h2><div class="progress"><i style="width:100%"></i></div>
+    <p class="muted">Этот набор больше не предлагается. Выбери другой набор или сбрось прогресс, чтобы пройти его заново.</p>
+    <div class="actions"><button class="btn ghost" id="sReset">Сбросить прогресс набора</button></div>`;
+  twoClick($('#sReset'),'Сбросить прогресс набора',()=>{setItems(id).forEach(x=>delete DONE.sent[x.key]);saveDone();startSet(id)});
+}
+function updSetProgress(){
+  const n=setItems(S.set).length,d=solvedOf(S.set);
+  $('#sPos').textContent=`${S.queue[S.i].lab} · решено ${d} из ${n}`;
+  $('#sBar').style.width=(d/n*100)+'%';
 }
 function curS(){
   const [t,vs,as]=S.queue[S.i].it;
@@ -495,9 +484,8 @@ function renderS(){
   let k=0;
   const html=esc(c.t).split('___').map((part,i,arr)=>part+(i<arr.length-1?`<input class="ans" data-k="${k++}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done">`:'')).join('');
   $('#sText').innerHTML=html+` <span class="verb-tag">${esc(c.vs)}</span>`;
-  $('#sPos').textContent=S.queue[S.i].lab+'  ('+(S.i+1)+' / '+S.queue.length+')';
+  updSetProgress();
   $('#sScore').innerHTML=`верно: <b>${S.ok}</b> / ${S.done}`;
-  $('#sBar').style.width=(S.i/S.queue.length*100)+'%';
   $('#sFb').innerHTML='';$('#sMain').textContent='Проверить';
   $('#sHint').classList.remove('hidden');$('#sShow').classList.remove('hidden');
   const first=$('#sText input');if(first&&matchMedia('(hover:hover)').matches)first.focus();
@@ -521,10 +509,10 @@ function checkS(show){
     inp.classList.remove('ok','bad','diac');inp.classList.add(show?'diac':cls(res.r));
     if(good||show)inp.readOnly=true;else allOk=false;
     if(!good)firstOk=false;
-    if(first){if(good)okMist(v.inf,p);else addMist(v.inf,p)}
+    if(first){if(good)okMist(v.inf,p);else addMist(v.inf,p);logResult('zdania',v.inf,p,inp.value,res.r)}
     fb+=(!first&&good)?`<div class="fb ok">✓ Теперь верно: <b>${esc(v.f[p])}</b></div>`:fbHTML(res,v,p,inp.value);
   });
-  if(first){S.checked=true;S.done++;if(firstOk)S.ok++;else S.wrong.push(S.queue[S.i])}
+  if(first){S.checked=true;S.done++;const sk=S.queue[S.i].key;if(firstOk){S.ok++;DONE.sent[sk]=1}else{S.wrong.push(S.queue[S.i]);delete DONE.sent[sk]}saveDone();setChips();updSetProgress()}
   S.solved=allOk;
   $('#sFb').innerHTML=fb;
   $('#sHint').classList.add('hidden');$('#sShow').classList.add('hidden');
@@ -543,13 +531,14 @@ function sMain(){
   checkS(false);
 }
 function doneS(){
-  $('#sCard').classList.add('hidden');
-  const pct=Math.round(S.ok/S.queue.length*100);
-  $('#sDone').classList.remove('hidden');
-  $('#sDone').innerHTML=`<h2>Итог: ${S.ok} / ${S.queue.length} (${pct}%)</h2>`+
-   (S.wrong.length?`<p class="muted">Ошибки:</p><ul class="list">${S.wrong.map(w=>{const [t,,a]=w.it;let k=0;const as=a.split(' / ');return `<li>${esc(t).split('___').map((x,i,arr)=>x+(i<arr.length-1?`<b>${esc(as[k++])}</b>`:'')).join('')}</li>`}).join('')}</ul>`:'<p>Bez błędów — świetnie!</p>')+
-   `<div class="actions">${S.wrong.length?'<button class="btn primary" id="sRetry">Повторить ошибки</button>':''}<button class="btn ghost" id="sAgain">Заново</button></div>`;
-  const r=$('#sRetry');if(r)r.onclick=()=>{const w=S.wrong;Object.assign(S,{queue:shuffle(w),i:0,ok:0,done:0,wrong:[]});$('#sDone').classList.add('hidden');$('#sCard').classList.remove('hidden');renderS()};
+  const left=setItems(S.set).filter(x=>!DONE.sent[x.key]).length;
+  if(!left){showSetDone(S.set);return}
+  $('#sCard').classList.add('hidden');$('#sDone').classList.remove('hidden');
+  const n=setItems(S.set).length,d=n-left;
+  $('#sDone').innerHTML=`<h2>Круг пройден: верно ${S.ok} из ${S.queue.length}</h2><div class="progress"><i style="width:${d/n*100}%"></i></div>
+    <p class="muted">${esc(setName(S.set))}: решено ${d} из ${n}. Осталось ${left} — это задания с ошибками.</p>`+
+   (S.wrong.length?`<ul class="list">${S.wrong.map(w=>{const [t,,a]=w.it;let k=0;const as=a.split(' / ');return `<li>${esc(t).split('___').map((x,i,arr)=>x+(i<arr.length-1?`<b>${esc(as[k++])}</b>`:'')).join('')}</li>`}).join('')}</ul>`:'')+
+   `<div class="actions"><button class="btn primary" id="sAgain">Продолжить (${left})</button></div>`;
   $('#sAgain').onclick=()=>startSet(S.set);
 }
 $('#sMain').onclick=sMain;
@@ -560,7 +549,8 @@ $('#sSkip').onclick=nextS;
 /* ---------- ФОРМЫ (drill) ---------- */
 const D={groups:store.get('plc-groups',['A','B','C','D','S']),mode:store.get('plc-mode','type'),ok:0,n:0,streak:0,cur:null,checked:false,source:'all'};
 function grpChips(){
-  $('#grpChips').innerHTML=Object.entries(G).map(([k,g])=>`<button class="chip ${D.groups.includes(k)?'on':''}" data-g="${k}">${esc(g.name.split(' (')[0])}</button>`).join('')+
+  const doneG=k=>VERBS.filter(v=>v.g===k&&(D.source==='all'||v.src)).every(v=>v.f.every((_,p)=>DONE.forms[v.inf+'|'+p]&&!MIST[v.inf+'|'+p]));
+  $('#grpChips').innerHTML=Object.entries(G).map(([k,g])=>`<button class="chip ${D.groups.includes(k)?'on':''}" data-g="${k}">${esc(g.name.split(' (')[0])}${doneG(k)?' ✓':''}</button>`).join('')+
     `<button class="chip ${D.source==='src'?'on':''}" data-src="1">только из урока</button>`;
 }
 $('#grpChips').onclick=e=>{
@@ -571,17 +561,42 @@ $('#grpChips').onclick=e=>{
 };
 $('#modeChips').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;D.mode=b.dataset.m;store.set('plc-mode',D.mode);
   document.querySelectorAll('#modeChips .chip').forEach(c=>c.classList.toggle('on',c===b));renderD()};
+function drillForms(){
+  const out=[];VERBS.filter(v=>D.groups.includes(v.g)&&(D.source==='all'||v.src))
+    .forEach(v=>{for(let p=0;p<6;p++)out.push({v,p,k:v.inf+'|'+p})});
+  const wrong=out.filter(f=>MIST[f.k]),fresh=out.filter(f=>!MIST[f.k]&&!DONE.forms[f.k]);
+  return {all:out,wrong,fresh,learned:out.length-wrong.length-fresh.length};
+}
 function pickD(){
-  const pool=VERBS.filter(v=>D.groups.includes(v.g)&&(D.source==='all'||v.src));
-  let v,p,tries=0;
-  do{v=rnd(pool);p=Math.floor(Math.random()*6);tries++}while(D.cur&&v.inf===D.cur.v.inf&&p===D.cur.p&&tries<10);
-  return {v,p,pron:rnd(PV[p])};
+  const F=drillForms();
+  let pool;
+  if(F.wrong.length&&(Math.random()<0.4||!F.fresh.length))pool=F.wrong;
+  else if(F.fresh.length)pool=F.fresh;
+  else return null;
+  const cur=D.cur?D.cur.v.inf+'|'+D.cur.p:'';
+  let f,tries=0;do{f=rnd(pool);tries++}while(pool.length>1&&f.k===cur&&tries<10);
+  return {v:f.v,p:f.p,pron:rnd(PV[f.p])};
+}
+function progLine(){
+  const F=drillForms(),n=F.all.length;
+  return `<div class="progress" style="margin:8px 0 4px"><i style="width:${n?F.learned/n*100:0}%"></i></div>
+    <div class="score">выучено <b>${F.learned}</b> из ${n} · осталось ${F.fresh.length+F.wrong.length}${F.wrong.length?` (с ошибками ${F.wrong.length})`:''}</div>`;
 }
 function nextD(){D.cur=pickD();renderD()}
-function renderD(){renderDrill($('#dCard'),D,nextD)}
+function resetGroups(){drillForms().all.forEach(f=>delete DONE.forms[f.k]);saveDone();grpChips();nextD()}
+twoClick($('#resetDone'),'Сбросить прогресс выбранных групп',resetGroups);
+function renderD(){
+  if(!D.cur){
+    const n=drillForms().all.length;
+    $('#dCard').innerHTML=`<h2>✓ Выучено ${n} из ${n}</h2><div class="progress"><i style="width:100%"></i></div>
+      <p class="muted">Все формы выбранных групп выучены, больше они не предлагаются. Выбери другие группы или сбрось прогресс кнопкой выше.</p>`;
+    return;
+  }
+  renderDrill($('#dCard'),D,()=>{grpChips();nextD()});
+}
 function renderDrill(box,st,onNext){
   const {v,p,pron}=st.cur;st.checked=false;st.solved=false;
-  const head=`<div class="row" style="justify-content:space-between"><span class="score">${st===E?'Работа над ошибками':'Формы'}</span><span class="score">верно <b>${st.ok}</b> / ${st.n} · серия <b>${st.streak}</b></span></div>
+  const head=`<div class="row" style="justify-content:space-between"><span class="score">${st===E?'Работа над ошибками':'Формы'}</span><span class="score">верно <b>${st.ok}</b> / ${st.n} · серия <b>${st.streak}</b></span></div>${st===D?progLine():''}
    <div class="prompt"><span class="pron">${pron}</span> · ${esc(v.inf)}</div><div class="sub">${esc(v.ru)}${pron==='pan'||pron==='pani'?' · вежливое «Вы» → как on/ona':''}</div>`;
   if(st.mode==='choice'){
     const uniq=[...new Set(v.f)];const others=shuffle(uniq.filter(f=>f!==v.f[p])).slice(0,3);
@@ -618,6 +633,7 @@ function renderDrill(box,st,onNext){
   function finish(res,user){
     st.checked=true;st.n++;
     if(res.r==='ok'){st.ok++;st.streak++;okMist(v.inf,p)}else{st.streak=0;addMist(v.inf,p)}
+    logResult(st===E?'bledy':(st.mode==='choice'?'formy-wybor':'formy'),v.inf,p,user,res.r);
     box.querySelector('.fb-slot').innerHTML=fbHTML(res,v,p,user);
     box.querySelector('.score:last-child').innerHTML=`верно <b>${st.ok}</b> / ${st.n} · серия <b>${st.streak}</b>`;
     const i=box.querySelector('input');
@@ -653,6 +669,7 @@ function checkT(){
   $('#tBody').querySelectorAll('.fix').forEach(x=>x.remove());
   $('#tBody').querySelectorAll('input').forEach(inp=>{
     const i=+inp.dataset.i,res=judge(inp.value,v,i);
+    if(T.first)logResult('tabela',v.inf,i,inp.value,res.r==='empty'?'bad':res.r);
     inp.classList.remove('ok','bad','diac');inp.classList.add(cls(res.r==='empty'?'bad':res.r));
     if(res.r==='ok'){ok++;if(T.first)okMist(v.inf,i);inp.readOnly=true}
     else{if(T.first)addMist(v.inf,i);const d=document.createElement('div');d.className='fix';
@@ -785,11 +802,25 @@ Object.values(BT).forEach(th=>{th.w=th.w.map(s=>{const [m,b,t,ru,fr]=s.split('|'
 const Z = {th:store.get('plc-bt',Object.keys(BT)),c:store.get('plc-bc','mix'),ok:0,n:0,streak:0,cur:null,checked:false,solved:false};
 Z.th=Z.th.filter(k=>BT[k]);if(!Z.th.length)Z.th=Object.keys(BT);
 if(!['mix','b','m'].includes(Z.c))Z.c='mix';
+const zCases=()=>Z.c==='mix'?['b','m']:[Z.c];
+function zItems(ths){
+  const out=[];(ths||Z.th).forEach(th=>BT[th].w.forEach(w=>zCases().forEach(cs=>out.push({th,w,cs,k:th+'|'+w.m+'|'+cs}))));
+  const wrong=out.filter(x=>MISTB[x.k]),fresh=out.filter(x=>!MISTB[x.k]&&!DONE.words[x.k]);
+  return {all:out,wrong,fresh,learned:out.length-wrong.length-fresh.length};
+}
 function pickZ(){
-  let th,w,t=0;
-  do{th=rnd(Z.th);w=rnd(BT[th].w);t++}while(Z.cur&&w===Z.cur.w&&t<10);
-  const cs=Z.c==='mix'?rnd(['b','m']):Z.c;
-  return {th,w,cs,fr:zFrame(th,w,cs)};
+  const F=zItems();let pool;
+  if(F.wrong.length&&(Math.random()<0.4||!F.fresh.length))pool=F.wrong;
+  else if(F.fresh.length)pool=F.fresh;
+  else return null;
+  const cur=Z.cur?bKey(Z.cur):'';
+  let x,t=0;do{x=rnd(pool);t++}while(pool.length>1&&x.k===cur&&t<10);
+  return {th:x.th,w:x.w,cs:x.cs,fr:zFrame(x.th,x.w,x.cs)};
+}
+function zProg(){
+  const F=zItems(),n=F.all.length;
+  return `<div class="progress" style="margin:8px 0 4px"><i style="width:${n?F.learned/n*100:0}%"></i></div>
+    <div class="score">выучено <b>${F.learned}</b> из ${n} · осталось ${F.fresh.length+F.wrong.length}${F.wrong.length?` (с ошибками ${F.wrong.length})`:''}</div>`;
 }
 function zFrame(th,w,cs){
   const T=BT[th];let fr=cs==='b'?rnd(w.B||T.B):rnd(T.M);
@@ -815,9 +846,9 @@ function judgeZ(user,cur){
 }
 function zWhy(cur){
   const tr=esc(zTrig(cur));
-  if(cur.cs==='m')return `После <b>${tr}</b> — mianownik: форма как в словаре.`;
+  if(cur.cs==='m')return `После <b>${tr}</b> — именительный падеж (mianownik): форма как в словаре.`;
   const k=ZK[cur.w.t];
-  return `После <b>${tr}</b> — biernik. ${k.n}: ${k.r}.`+(/ (z|na) /.test(cur.w.m)?' Часть после <i>z / na</i> не меняется.':'');
+  return `После <b>${tr}</b> — винительный падеж (biernik). ${k.n}: ${k.r}.`+(/ (z|na) /.test(cur.w.m)?' Часть после <i>z / na</i> не меняется.':'');
 }
 function fbZ(res,cur,user){
   const a=zAlt(cur);
@@ -826,13 +857,13 @@ function fbZ(res,cur,user){
   switch(res){
     case 'ok': return `<div class="fb ok">✓ Dobrze! ${right}${why}</div>`;
     case 'diac': return `<div class="fb diac">Почти: проверь польские буквы. Правильно: ${right}${why}</div>`;
-    case 'case': return `<div class="fb bad">«${esc(user)}» — это ${cur.cs==='m'?'biernik':'mianownik'}. После <b>${esc(zTrig(cur))}</b> нужен ${cur.cs==='m'?'mianownik':'biernik'}: ${right}${why}</div>`;
+    case 'case': return `<div class="fb bad">«${esc(user)}» — это ${cur.cs==='m'?'винительный':'именительный'} падеж. После <b>${esc(zTrig(cur))}</b> нужен ${cur.cs==='m'?'именительный (mianownik)':'винительный (biernik)'}: ${right}${why}</div>`;
     case 'show': return `<div class="fb hint">Ответ: ${right}${why}</div>`;
     default: return `<div class="fb bad">Неверно. Правильно: ${right}${why}</div>`;
   }
 }
 function zChips(){
-  $('#zTh').innerHTML=Object.entries(BT).map(([k,t])=>`<button class="chip${Z.th.includes(k)?' on':''}" data-t="${k}">${esc(t.t)} <span style="opacity:.6">${t.w.length}</span></button>`).join('');
+  $('#zTh').innerHTML=Object.entries(BT).map(([k,t])=>{const F=zItems([k]),n=F.all.length;return `<button class="chip${Z.th.includes(k)?' on':''}" data-t="${k}">${esc(t.t)} <span style="opacity:.7">${F.learned===n?'✓':F.learned+'/'+n}</span></button>`}).join('');
   document.querySelectorAll('#zChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.z===Z.c));
 }
 $('#zTh').onclick=e=>{
@@ -841,13 +872,23 @@ $('#zTh').onclick=e=>{
   store.set('plc-bt',Z.th);zChips();nextZ();
 };
 $('#zChips').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;Z.c=b.dataset.z;store.set('plc-bc',Z.c);zChips();nextZ()};
-function nextZ(){Z.cur=pickZ();renderZ($('#zCard'),Z,nextZ)}
-// st - состояние (Z для вкладки «Biernik», ZE для «Ошибок»), onNext - следующее задание
+function nextZ(){
+  Z.cur=pickZ();zChips();
+  if(!Z.cur){
+    const n=zItems().all.length;
+    $('#zCard').innerHTML=`<h2>✓ Выучено ${n} из ${n}</h2><div class="progress"><i style="width:100%"></i></div>
+      <p class="muted">Все слова выбранных тем выучены, больше они не предлагаются. Выбери другие темы или сбрось прогресс кнопкой выше.</p>`;
+    return;
+  }
+  renderZ($('#zCard'),Z,nextZ);
+}
+twoClick($('#zReset'),'Сбросить прогресс выбранных тем',()=>{zItems().all.forEach(x=>delete DONE.words[x.k]);saveDone();nextZ()});
+// st - состояние (Z для вкладки «Винительный», ZE для «Ошибок»), onNext - следующее задание
 function renderZ(box,st,onNext){
   const cur=st.cur,T=BT[cur.th];st.checked=false;st.solved=false;
   const score=()=>`верно <b>${st.ok}</b> / ${st.n} · серия <b>${st.streak}</b>`;
   const [pre,post]=esc(cur.fr).split('___');
-  box.innerHTML=`<div class="row" style="justify-content:space-between"><span class="score">${st===Z?'':'Работа над ошибками · '}${esc(T.t)}</span><span class="score zs">${score()}</span></div>
+  box.innerHTML=`<div class="row" style="justify-content:space-between"><span class="score">${st===Z?'':'Работа над ошибками · '}${esc(T.t)}</span><span class="score zs">${score()}</span></div>${st===Z?zProg():''}
     ${T.lead?`<div class="sub" style="margin:6px 0 4px">${T.lead}</div>`:''}
     <div class="sentence">${pre}<input class="ans" style="width:12.5em;max-width:100%" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done">${post}</div>
     <div class="sub" style="margin:4px 0 0"><span class="verb-tag">${esc(cur.w.m)}</span> ${esc(cur.w.ru)}</div>
@@ -862,7 +903,7 @@ function renderZ(box,st,onNext){
     if(!inp.value.trim()){inp.focus();return}
     const res=judgeZ(inp.value,cur);
     inp.classList.remove('ok','bad','diac');inp.classList.add(cls(res));
-    if(!st.checked){st.checked=true;st.n++;if(res==='ok'){st.ok++;st.streak++;okMistB(cur)}else{st.streak=0;addMistB(cur)}box.querySelector('.zs').innerHTML=score()}
+    if(!st.checked){st.checked=true;st.n++;if(res==='ok'){st.ok++;st.streak++;okMistB(cur)}else{st.streak=0;addMistB(cur)}logResult(st===Z?'vinit':'bledy-vinit',cur.th+'|'+cur.w.m,cur.cs,inp.value,res);box.querySelector('.zs').innerHTML=score()}
     else if(res==='ok'){slot.innerHTML=`<div class="fb ok">✓ Теперь верно: <b class="ink">${zSent(cur,esc(zAns(cur)))}</b></div>`;solved();return}
     slot.innerHTML=fbZ(res,cur,inp.value);
     if(res==='ok'){solved();return}
@@ -875,7 +916,7 @@ function renderZ(box,st,onNext){
   ck.onclick=go;nx.onclick=next;
   box.querySelector('.hn').onclick=()=>{slot.innerHTML=`<div class="fb hint">${zWhy(cur)}</div>`};
   box.querySelector('.sw').onclick=()=>{
-    st.checked=true;st.n++;st.streak=0;addMistB(cur);box.querySelector('.zs').innerHTML=score();
+    st.checked=true;st.n++;st.streak=0;addMistB(cur);logResult(st===Z?'vinit':'bledy-vinit',cur.th+'|'+cur.w.m,cur.cs,'','show');box.querySelector('.zs').innerHTML=score();
     inp.value=zAns(cur);inp.classList.add('diac');slot.innerHTML=fbZ('show',cur,'');solved();
   };
 }
@@ -908,7 +949,7 @@ function renderE(){
   if(!nv&&!nb){$('#eCard').innerHTML='<div class="empty">Ошибок пока нет. Сделай упражнения — сюда попадут формы, в которых ты ошибся.</div>';$('#eList').classList.add('hidden');return}
   if(E.kind==='v'&&!nv)E.kind='b';
   if(E.kind==='b'&&!nb)E.kind='v';
-  $('#eKinds').innerHTML=`<button class="chip${E.kind==='v'?' on':''}" data-k="v">Формы глаголов · ${nv}</button><button class="chip${E.kind==='b'?' on':''}" data-k="b">Biernik · ${nb}</button>`;
+  $('#eKinds').innerHTML=`<button class="chip${E.kind==='v'?' on':''}" data-k="v">Формы глаголов · ${nv}</button><button class="chip${E.kind==='b'?' on':''}" data-k="b">Винительный · ${nb}</button>`;
   if(E.kind==='b'){renderBE();return}
   E.cur=pickE();renderDrill($('#eCard'),E,renderE);
   const top=Object.entries(MIST).sort((a,b)=>b[1]-a[1]).slice(0,15);
@@ -922,70 +963,134 @@ function renderBE(){
   ZE.cur=pickBE();renderZ($('#eCard'),ZE,renderE);
   const top=Object.entries(MISTB).sort((a,b)=>b[1]-a[1]).slice(0,15);
   $('#eList').classList.remove('hidden');
-  $('#eList').innerHTML=`<p class="label">Трудные слова: падеж (уходят после верного ответа)</p><ul class="list">${top.map(([k,n])=>{const [th,m,cs]=k.split('|'),w=BT[th].w.find(x=>x.m===m);return `<li>${cs==='b'?'biernik':'mianownik'} · <b>${esc(cs==='b'?w.b:w.m)}</b> <span class="muted">(${esc(w.m)}) ×${n}</span></li>`}).join('')}</ul>
+  $('#eList').innerHTML=`<p class="label">Трудные слова: падеж (уходят после верного ответа)</p><ul class="list">${top.map(([k,n])=>{const [th,m,cs]=k.split('|'),w=BT[th].w.find(x=>x.m===m);return `<li>${cs==='b'?'винительный':'именительный'} · <b>${esc(cs==='b'?w.b:w.m)}</b> <span class="muted">(${esc(w.m)}) ×${n}</span></li>`}).join('')}</ul>
    <div class="actions"><button class="btn ghost" id="eClear">Очистить список</button></div>`;
   $('#eClear').onclick=()=>{MISTB={};store.set('plc-bmist',MISTB);updErr();renderE()};
 }
 
 /* ---------- ШПАРГАЛКА ---------- */
+const R=store.get('plc-ref',{sec:'how',verb:{}});
+function lcp(a){let x=a[0];for(const y of a)while(!y.startsWith(x))x=x.slice(0,-1);return x}
+function refTable(v){
+  const stem=lcp(v.f);
+  return '<table class="conj">'+v.f.map((f,i)=>`<tr><td>${P[i]}</td><td>${stem?esc(stem)+'<span class="end">'+esc(f.slice(stem.length))+'</span>':esc(f)}</td></tr>`).join('')+'</table>';
+}
 function renderRef(){
-  $('#ref').innerHTML=`<div class="card"><h2>Как выбрать форму</h2><ol class="list">
-   <li><b>Лицо:</b> местоимение в скобках или подлежащее (Marek = on, dwa samochody = one, pan/pani = on/ona).</li>
-   <li><b>Группа:</b> по инфинитиву — -ować → A, -ać → B, -ić/-yć/-eć → C. Но pisać, dawać → D; woleć → C; rozumieć → особые.</li>
-   <li><b>Форма:</b> основа + окончание. <i>się</i> стоит после глагола.</li></ol></div>`+
-  Object.entries(G).map(([k,g])=>{
-    const vs=VERBS.filter(v=>v.g===k);const ex=vs[0];
-    return `<div class="card"><h2>${esc(g.name)}</h2><p style="margin:0">${g.rule}</p>
-     <div class="ends">${g.ends.map((e,i)=>`<div><small>${P[i]}</small>${esc(e)}</div>`).join('')}</div>
-     ${vs.map(v=>`<details><summary>${esc(v.inf)} <span>— ${esc(v.ru)}</span></summary>${conjTable(v,-1)}</details>`).join('')}</div>`;
-  }).join('');
-}
-
-/* ---------- СЛОВА: подсчёт слов в тексте ---------- */
-// Слово - любая группа знаков между пробелами, в которой есть буква или цифра.
-// Поэтому "e-mail", "np.", "2024" - одно слово, а "–", "..." - ни одного.
-const words = t => t.split(/\s+/).filter(w=>/[\p{L}\p{N}]/u.test(w));
-// Русское склонение: 1 слово, 2 слова, 5 слов
-const plural = (n,one,few,many) => {const a=n%10,b=n%100;return a===1&&b!==11?one:a>=2&&a<=4&&(b<12||b>14)?few:many};
-const slow = n => n+' '+plural(n,'слово','слова','слов');
-const NEEDS=[25,30,40,100,150,160,170,175,200,260,270];
-const W={need:store.get('plc-need',175)};
-function needChips(){
-  $('#wNeedChips').innerHTML=NEEDS.map(n=>`<button class="chip${n===W.need?' on':''}" data-n="${n}">${n}</button>`).join('');
-}
-function renderW(){
-  const t=$('#wText').value, ws=words(t), n=ws.length, need=W.need;
-  const chars=t.replace(/\s/g,'').length;
-  let html=`<div class="big">${slow(n)}</div><div class="muted">${chars} знаков без пробелов</div>`;
-  if(need>0){
-    const lo=Math.ceil(need*0.9), hi=Math.floor(need*1.1), pct=Math.round(n*100/need);
-    html+=`<div class="muted" style="margin-top:4px">${n} / ${need} — ${pct}%</div>`;
-    if(!n){/* пустой текст: без оценки */}
-    else if(n<lo) html+=`<div class="fb diac">Мало: не хватает ${slow(lo-n)} до минимума ${lo} (норма ${lo}–${hi}).</div>`;
-    else if(n>hi) html+=`<div class="fb bad">Много: на ${slow(n-hi)} больше максимума ${hi} (норма ${lo}–${hi}).</div>`;
-    else html+=`<div class="fb ok">✓ В норме: ${lo}–${hi} слов.</div>`;
+  const secs=[['how','Как выбрать'],...Object.entries(G).map(([k,g])=>[k,g.name.split(' (')[0]])];
+  let body;
+  if(R.sec==='how'){
+    body=`<h2>Как выбрать форму</h2><ol class="list">
+     <li><b>Лицо:</b> местоимение в скобках или подлежащее (Marek = on, dwa samochody = one, pan/pani = on/ona).</li>
+     <li><b>Группа:</b> по инфинитиву — -ować → A, -ać → B, -ić/-yć/-eć → C. Но pisać, dawać → D; woleć → C; rozumieć → особые.</li>
+     <li><b>Форма:</b> основа + окончание. <i>się</i> стоит после глагола.</li></ol>`;
+  }else{
+    const g=G[R.sec],vs=VERBS.filter(v=>v.g===R.sec);
+    const cur=V[R.verb[R.sec]]&&V[R.verb[R.sec]].g===R.sec?V[R.verb[R.sec]]:vs[0];
+    body=`<h2>${esc(g.name)}</h2><p style="margin:0">${g.rule}</p>
+      <div class="ends">${g.ends.map((e,i)=>`<div><small>${P[i]}</small>${esc(e)}</div>`).join('')}</div>
+      <p class="label" style="margin-top:14px">Глагол</p>
+      <div class="chips" id="refVerbs">${vs.map(v=>`<button class="chip ${v===cur?'on':''}" data-v="${esc(v.inf)}">${esc(v.inf)}</button>`).join('')}</div>
+      <div style="margin-top:14px"><h3>${esc(cur.inf)} <span class="muted" style="font-weight:400">— ${esc(cur.ru)}</span></h3>${refTable(cur)}</div>`;
   }
-  $('#wRes').innerHTML=html;
-  $('#wListN').textContent=n?'· '+n:'';
-  $('#wList').innerHTML=ws.map((w,i)=>`<span><small>${i+1}</small>${esc(w)}</span>`).join('');
+  $('#ref').innerHTML=`<div class="card"><p class="label">Раздел</p><div class="chips" id="refSecs">${secs.map(([k,t])=>`<button class="chip ${R.sec===k?'on':''}" data-r="${k}">${esc(t)}</button>`).join('')}</div></div><div class="card">${body}</div>`;
 }
-$('#wText').value=store.get('plc-text','');
-$('#wNeed').value=W.need;
-$('#wText').addEventListener('input',()=>{store.set('plc-text',$('#wText').value);renderW()});
-$('#wNeed').addEventListener('input',()=>{const v=parseInt($('#wNeed').value,10);W.need=v>0?v:0;store.set('plc-need',W.need);needChips();renderW()});
-$('#wNeedChips').addEventListener('click',e=>{
-  const c=e.target.closest('.chip');if(!c)return;
-  W.need=+c.dataset.n;$('#wNeed').value=W.need;store.set('plc-need',W.need);needChips();renderW();
+$('#ref').addEventListener('click',e=>{
+  const b=e.target.closest('.chip');if(!b)return;
+  if(b.dataset.r)R.sec=b.dataset.r;else if(b.dataset.v)R.verb[R.sec]=b.dataset.v;else return;
+  store.set('plc-ref',R);renderRef();
 });
-$('#wClear').addEventListener('click',()=>{$('#wText').value='';store.set('plc-text','');renderW();$('#wText').focus()});
+
+/* ---------- облако Claude (db) ---------- */
+const CLOUD={db:null,ok:false};
+const DIRTY={},TIMERS={},WRITING={},DAYS={};
+const dayKey=()=>new Date().toLocaleDateString('sv-SE');
+function setSync(st){
+  const t={cloud:'☁ Результаты сохраняются в облаке Claude',local:'Результаты сохраняются только на этом устройстве',error:'Облако Claude сейчас недоступно — сохраняю на устройстве',wait:'Подключаюсь к облаку Claude…'}[st];
+  const el=$('#syncState');if(el)el.textContent=t;
+}
+function schedule(path,getData,delay=1500){
+  if(!CLOUD.ok)return;DIRTY[path]=getData;clearTimeout(TIMERS[path]);TIMERS[path]=setTimeout(()=>flush(path),delay);
+}
+async function flush(path){
+  if(!DIRTY[path])return;
+  if(WRITING[path]){TIMERS[path]=setTimeout(()=>flush(path),500);return}
+  const g=DIRTY[path];delete DIRTY[path];WRITING[path]=true;
+  try{await CLOUD.db.doc(path).set(g())}
+  catch(e){if(e&&e.code==='unavailable'){DIRTY[path]=DIRTY[path]||g;TIMERS[path]=setTimeout(()=>flush(path),3000)}else setSync('error')}
+  WRITING[path]=false;
+  if(DIRTY[path])flush(path);
+}
+function flushAll(){Object.keys(DIRTY).forEach(p=>{clearTimeout(TIMERS[p]);flush(p)})}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushAll()});
+function syncDone(){schedule('progress/done',()=>({forms:{...DONE.forms},sent:{...DONE.sent},words:{...DONE.words},updated:Date.now()}))}
+function syncMist(){schedule('progress/mistakes',()=>({items:{...MIST},itemsB:{...MISTB},updated:Date.now()}))}
+async function logResult(mode,inf,p,ans,r){
+  if(!CLOUD.ok)return;
+  const k=dayKey();
+  if(!DAYS[k])DAYS[k]=CLOUD.db.doc('days/'+k).get()
+    .then(sn=>{const d=sn.exists?sn.data():{};return {date:k,n:d.n||0,ok:d.ok||0,log:Array.isArray(d.log)?d.log.slice():[]}})
+    .catch(()=>({date:k,n:0,ok:0,log:[]}));
+  const d=await DAYS[k];
+  d.n++;if(r==='ok')d.ok++;
+  d.log.push({t:Date.now(),m:mode,v:inf,p,a:String(ans||'').slice(0,60),r});
+  if(d.log.length>800)d.log.shift();
+  schedule('days/'+k,()=>({date:d.date,n:d.n,ok:d.ok,log:d.log.slice()}));
+}
+const withTimeout=(pr,ms)=>Promise.race([pr,new Promise((_,j)=>setTimeout(()=>j({code:'timeout'}),ms))]);
+async function renderStats(){
+  const box=$('#eStats');
+  if(!CLOUD.ok){box.innerHTML='<p class="label">Статистика по дням</p><div class="empty">Доступна в версии внутри Claude (артефакт или приложение для компьютера).</div>';return}
+  box.innerHTML='<p class="label">Статистика по дням</p><div class="empty">Загружаю…</div>';
+  try{
+    const q=await withTimeout(CLOUD.db.collection('days').orderBy('date','desc').limit(14).get(),10000);
+    const rows=new Map(q.docs.map(d=>[d.id,d.data()]));
+    for(const [k,pr] of Object.entries(DAYS)){const d=await pr;rows.set(k,d)}
+    const list=[...rows.values()].filter(r=>r&&r.n).sort((a,b)=>a.date<b.date?1:-1).slice(0,14);
+    if(!list.length){box.innerHTML='<p class="label">Статистика по дням</p><div class="empty">Пока нет ответов.</div>';return}
+    box.innerHTML='<p class="label">Статистика по дням (первая попытка)</p><table class="stat"><tr><th>Дата</th><th>Ответов</th><th>Верно</th></tr>'+
+      list.map(r=>`<tr><td>${esc(r.date)}</td><td>${Number(r.n)||0}</td><td>${Math.round((Number(r.ok)||0)/(Number(r.n)||1)*100)}%</td></tr>`).join('')+'</table>';
+  }catch(e){box.innerHTML='<p class="label">Статистика по дням</p><div class="empty">Не удалось загрузить статистику. Попробуй позже.</div>'}
+}
+(async()=>{
+  if(!window.claude||typeof claude.use!=='function'){setSync('local');return}
+  setSync('wait');
+  let db=null;try{db=await claude.use('db')}catch(e){}
+  if(!db){setSync('local');return}
+  CLOUD.db=db;
+  try{
+    const ref=db.doc('progress/mistakes');
+    const sn=await withTimeout(ref.get(),10000);
+    const hasB=sn.exists&&(sn.data()||{}).itemsB;
+    if(sn.exists){const x=sn.data()||{};MIST={...(x.items||{})};if(x.itemsB)MISTB={...x.itemsB};store.set('plc-mist',MIST);store.set('plc-bmist',MISTB);updErr()}
+    if(!sn.exists||(!hasB&&Object.keys(MISTB).length)){if(Object.keys(MIST).length||Object.keys(MISTB).length)await ref.set({items:{...MIST},itemsB:{...MISTB},updated:Date.now()})}
+    const dref=db.doc('progress/done');
+    const dn=await withTimeout(dref.get(),10000);
+    if(dn.exists){const x=dn.data()||{};DONE={forms:{...(x.forms||{})},sent:{...(x.sent||{})},words:{...(x.words||{})}};store.set('plc-done',DONE)}
+    else if(Object.keys(DONE.forms).length||Object.keys(DONE.sent).length||Object.keys(DONE.words).length){await dref.set({forms:{...DONE.forms},sent:{...DONE.sent},words:{...DONE.words},updated:Date.now()})}
+    dref.onSnapshot(s=>{
+      if(!s.exists||s.metadata.hasPendingWrites||DIRTY['progress/done']||WRITING['progress/done'])return;
+      const x=s.data()||{};DONE={forms:{...(x.forms||{})},sent:{...(x.sent||{})},words:{...(x.words||{})}};store.set('plc-done',DONE);
+    },()=>{});
+    CLOUD.ok=true;setSync('cloud');
+    setChips();grpChips();zChips();if(!S.checked)startSet(S.set);if(!D.checked)nextD();if(Z.cur&&!Z.checked)nextZ();
+    ref.onSnapshot(s=>{
+      if(!s.exists||s.metadata.hasPendingWrites||DIRTY['progress/mistakes']||WRITING['progress/mistakes'])return;
+      const x=s.data()||{};MIST={...(x.items||{})};MISTB={...(x.itemsB||{})};store.set('plc-mist',MIST);store.set('plc-bmist',MISTB);updErr();
+    },()=>{});
+    if(location.hash==='#bledy')renderStats();
+  }catch(e){setSync('error')}
+})();
 
 /* ---------- навигация ---------- */
-const VIEWS=['zdania','formy','tabela','biernik','bledy','sciaga','slowa'];
+const VIEWS=['zdania','formy','tabela','biernik','bledy','sciaga'];
 function route(){
-  const h=location.hash.slice(1);const v=VIEWS.includes(h)?h:'zdania';
+  const h=location.hash.slice(1);
+  if(h==='slowa'){location.replace('slowa/');return} // вкладка «Слова» переехала в отдельное приложение
+  const v=VIEWS.includes(h)?h:'zdania';
   VIEWS.forEach(x=>$('#v-'+x).classList.toggle('hidden',x!==v));
   document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.dataset.v===v));
-  if(v==='bledy')renderE();
+  const on=document.querySelector('#nav a.on');if(on)on.scrollIntoView({block:'nearest',inline:'nearest'});
+  if(v==='bledy'){renderE();renderStats()}
   if(v==='formy'&&!D.cur)nextD();
   if(v==='biernik'&&!Z.cur)nextZ();
 }
@@ -1001,9 +1106,30 @@ new MutationObserver(updKbd).observe(document.querySelector('.wrap'),{subtree:tr
 /* ---------- старт ---------- */
 setChips();grpChips();zChips();
 document.querySelectorAll('#modeChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.m===D.mode));
-tSel();renderT(rnd(VERBS).inf);renderRef();updErr();needChips();renderW();
+tSel();renderT(rnd(VERBS).inf);renderRef();updErr();
 startSet(store.get('plc-set','7A'));
 route();
+
+/* ---------- приложение для компьютера (Claude Desktop) ---------- */
+function appIcon(){
+  const c=document.createElement('canvas');c.width=c.height=256;const x=c.getContext('2d');
+  x.fillStyle='#c8102e';x.fillRect(0,0,256,256);
+  x.fillStyle='#fff';x.textAlign='center';x.textBaseline='middle';
+  x.font='italic 700 118px Georgia, "Times New Roman", serif';x.fillText('Ćw',128,116);
+  x.beginPath();x.roundRect?x.roundRect(77,190,102,13,6):x.rect(77,190,102,13);x.fill();
+  return c.toDataURL('image/png');
+}
+(async()=>{
+  try{
+    if(!window.claude||typeof claude.use!=='function')return;
+    const d=await claude.use('desktop');if(!d)return;
+    if(d.window){d.app.dock.setIcon(appIcon()).catch(()=>{});return}
+    if((await d.install.state())==='available'){
+      const b=$('#installBtn');b.classList.remove('hidden');
+      b.onclick=()=>d.install.request().then(r=>{if(r==='installed')b.classList.add('hidden')}).catch(()=>{});
+    }
+  }catch(e){}
+})();
 if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 </script>
 </body>
