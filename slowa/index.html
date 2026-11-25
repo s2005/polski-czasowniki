@@ -21,13 +21,13 @@
   --bg:#f6f3ee; --card:#fffdf9; --ink:#1f1c19; --muted:#6f675e; --line:#e4ddd3;
   --accent:#2c4a7a; --accent-soft:#e3ebf7; --on-accent:#ffffff; --ok:#1f7a4d; --ok-soft:#e3f3ea;
   --warn:#a15c00; --warn-soft:#fdf0dc; --bad:#b3261e; --bad-soft:#fbe6e4;
-  --chip:#efe9e0; --radius:14px;
+  --chip:#efe9e0; --radius:14px; --gram:#1d5fd1;
 }
 @media (prefers-color-scheme: dark){
   :root{
     --bg:#16130f; --card:#211d18; --ink:#f1ece4; --muted:#a79e92; --line:#3a332b;
     --accent:#9db9ea; --accent-soft:#1f2b3f; --on-accent:#10213d; --ok:#5cc98f; --ok-soft:#173326;
-    --warn:#f0b25a; --warn-soft:#3a2b14; --bad:#ff7b72; --bad-soft:#3b1d1b; --chip:#2c2620;
+    --warn:#f0b25a; --warn-soft:#3a2b14; --bad:#ff7b72; --bad-soft:#3b1d1b; --chip:#2c2620; --gram:#7fb0ff;
   }
 }
 *{box-sizing:border-box}
@@ -36,10 +36,6 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,syste
 body.has-kbd .wrap{padding-bottom:110px}
 header h1{font-family:Fraunces,Georgia,serif;font-size:1.7rem;margin:6px 0 2px;letter-spacing:-.01em}
 header p{margin:0;color:var(--muted);font-size:.92rem}
-nav{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0 8px;margin:10px 0 6px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
-nav::-webkit-scrollbar{display:none}
-nav a{flex:0 0 auto;text-decoration:none;color:var(--ink);background:var(--chip);padding:9px 14px;border-radius:999px;font-weight:600;font-size:.92rem;white-space:nowrap}
-nav a.on{background:var(--ink);color:var(--bg)}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 16px;margin:12px 0}
 .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
@@ -49,63 +45,26 @@ nav a.on{background:var(--ink);color:var(--bg)}
 .btn{border:0;border-radius:12px;padding:13px 18px;font:600 1rem Inter,sans-serif;cursor:pointer;background:var(--chip);color:var(--ink);min-height:48px}
 .btn.primary{background:var(--accent);color:var(--on-accent)}
 .btn.ghost{background:transparent;border:1px solid var(--line)}
+.btn.sm{min-height:36px;padding:7px 12px;font-size:.88rem;border-radius:10px}
 .btn:disabled{opacity:.45}
 .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-.actions .btn.primary{flex:1 1 160px}
-.score{font-size:.9rem;color:var(--muted)}
-.score b{color:var(--ink)}
-.prompt{font-family:Fraunces,Georgia,serif;font-size:2rem;font-weight:700;margin:4px 0 0;line-height:1.2}
-.prompt .pron{color:var(--accent)}
-.sub{color:var(--muted);margin:2px 0 14px}
-input.ans{width:100%;font:500 1.25rem Inter,sans-serif;padding:13px 14px;border-radius:12px;border:2px solid var(--line);background:var(--bg);color:var(--ink);outline:none}
-input.ans:focus{border-color:var(--ink)}
-input.ans.ok{border-color:var(--ok);background:var(--ok-soft)}
-input.ans.diac{border-color:var(--warn);background:var(--warn-soft)}
-input.ans.bad{border-color:var(--bad);background:var(--bad-soft)}
-.sentence{font-size:1.2rem;line-height:2.4}
-.sentence input.ans{display:inline-block;width:9.5em;font-size:1.1rem;padding:6px 10px;margin:0 2px;vertical-align:middle}
-.verb-tag{display:inline-block;background:var(--chip);border-radius:8px;padding:1px 8px;font-size:.95rem;color:var(--muted)}
-.choices{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.choices button{font:600 1.15rem Inter,sans-serif;padding:15px 8px;border-radius:12px;border:2px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
-.choices button.ok{border-color:var(--ok);background:var(--ok-soft)}
-.choices button.bad{border-color:var(--bad);background:var(--bad-soft)}
 .fb{margin-top:14px;padding:12px 14px;border-radius:12px;font-size:.97rem}
 .fb.ok{background:var(--ok-soft);color:var(--ok)}
 .fb.diac{background:var(--warn-soft);color:var(--warn)}
 .fb.bad{background:var(--bad-soft);color:var(--bad)}
 .fb.hint{background:var(--chip);color:var(--ink)}
 .fb b{font-weight:700}
-.fb .ink{color:var(--ink)}
-table.conj{border-collapse:collapse;width:100%;margin-top:10px;font-size:.98rem}
-table.conj td{padding:6px 8px;border-top:1px solid var(--line)}
-table.conj td:first-child{color:var(--muted);width:38%}
-table.conj tr.target td{background:var(--accent-soft);font-weight:700}
-table.conj tr.target td:first-child{color:var(--ink)}
-table.conj tr.yours td{text-decoration:line-through;text-decoration-color:var(--bad)}
-.end{color:var(--accent);font-weight:700}
 .kbd{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--card);border-top:1px solid var(--line);padding:8px 8px calc(8px + env(safe-area-inset-bottom));display:flex;justify-content:center;gap:5px}
 .kbd button{flex:1 1 0;max-width:52px;min-height:44px;font:600 1.15rem Inter,sans-serif;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;padding:0}
-.kbd.hide{display:none}
-select{font:500 1rem Inter,sans-serif;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);max-width:100%;flex:1 1 200px}
-.grid6{display:grid;grid-template-columns:auto 1fr;gap:8px 10px;align-items:center;margin-top:12px}
-.grid6 .p{color:var(--muted);font-weight:600}
-.grid6 .fix{grid-column:2;font-size:.9rem;color:var(--bad);margin-top:-4px}
-.grid6 input.ans{font-size:1.1rem;padding:10px 12px}
-.progress{height:6px;background:var(--chip);border-radius:9px;overflow:hidden;margin:4px 0 14px}
-.progress i{display:block;height:100%;background:var(--accent);transition:width .25s}
 h2{font-family:Fraunces,Georgia,serif;font-size:1.25rem;margin:0 0 6px}
 h3{font-size:1rem;margin:0 0 4px}
 details{border-top:1px solid var(--line);padding:8px 0}
 details summary{cursor:pointer;font-weight:600;list-style:none}
 details summary::-webkit-details-marker{display:none}
 details summary span{color:var(--muted);font-weight:400}
-.ends{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}
-.ends div{background:var(--chip);border-radius:10px;padding:7px 8px;font-size:.88rem}
-.ends div small{display:block;color:var(--muted);font-size:.75rem}
 .muted{color:var(--muted)}
 .list{margin:0;padding-left:18px}
 .list li{margin:3px 0}
-.empty{color:var(--muted);text-align:center;padding:18px 0}
 .hidden{display:none!important}
 textarea.txt{width:100%;min-height:220px;resize:vertical;font:400 1.05rem/1.5 Inter,sans-serif;padding:12px 14px;border-radius:12px;border:2px solid var(--line);background:var(--bg);color:var(--ink);outline:none}
 textarea.txt:focus{border-color:var(--ink)}
@@ -115,22 +74,57 @@ input.num:focus{border-color:var(--ink)}
 .tokens{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px}
 .tokens span{background:var(--chip);border-radius:8px;padding:2px 7px;font-size:.88rem}
 .tokens span small{color:var(--muted);margin-right:4px;font-size:.7rem}
+.install{margin-top:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 14px;font:600 .88rem Inter,sans-serif;cursor:pointer}
+
+/* --- редактор с подсветкой: прозрачный textarea поверх зеркального div --- */
+.ed{position:relative}
+.ed textarea.txt{position:relative;z-index:1;background:transparent;color:transparent;caret-color:var(--ink)}
+.ed textarea.txt::placeholder{color:var(--muted)}
+.ed textarea.txt::selection{color:transparent;background:rgba(44,74,122,.28)}
+.mir{position:absolute;left:2px;top:2px;z-index:0;overflow:hidden;white-space:pre-wrap;overflow-wrap:break-word;word-break:normal;font:400 1.05rem/1.5 Inter,sans-serif;padding:12px 14px;color:var(--ink);background:var(--bg);border-radius:10px;pointer-events:none}
+::highlight(sp){text-decoration:underline wavy var(--bad);text-decoration-skip-ink:none;text-decoration-thickness:1.5px}
+::highlight(gr){text-decoration:underline wavy var(--gram);text-decoration-skip-ink:none;text-decoration-thickness:1.5px}
+::highlight(cur){background-color:rgba(240,178,90,.38)}
+.status{display:grid;gap:6px;margin-top:10px;font-size:.88rem}
+.status .row{gap:6px 10px}
+.dot{display:inline-block;width:10px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
+.dot.sp{background:var(--bad)}.dot.gr{background:var(--gram)}
+.issue{margin-top:12px;padding:12px 14px;border-radius:12px;background:var(--chip);font-size:.95rem}
+.issue .what{font-weight:600}
+.issue .why{color:var(--muted);margin-top:3px}
+.issue .chips{margin-top:8px}
+.ilist{list-style:none;margin:8px 0 0;padding:0}
+.ilist li{padding:8px 0;border-top:1px solid var(--line);cursor:pointer;font-size:.93rem}
+.ilist li:first-child{border-top:0}
+.ilist li .k{display:inline-block;min-width:1.4em;font-weight:700}
+.ilist li .k.sp{color:var(--bad)}.ilist li .k.gr{color:var(--gram)}
+.ilist li .why{color:var(--muted)}
+.strike{text-decoration:line-through;text-decoration-color:var(--bad)}
 </style>
-<style>.install{margin-top:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 14px;font:600 .88rem Inter,sans-serif;cursor:pointer}</style>
 </head>
 <body class="has-kbd">
 <div class="wrap">
 <header>
   <h1>Ile słów?</h1>
-  <p>Подсчёт слов в письменной работе по правилам экзамена</p>
+  <p>Подсчёт слов по правилам экзамена, проверка орфографии и грамматики</p>
   <button class="install hidden" id="installBtn">⤓ Установить как приложение</button>
 </header>
-<!-- ============ SLOWA ============ -->
 <section id="v-slowa">
   <div class="card">
     <p class="label">Текст работы</p>
-    <textarea class="txt" id="wText" lang="pl" spellcheck="true" placeholder="Wpisz albo wklej tutaj swój tekst…"></textarea>
+    <div class="ed" id="ed">
+      <div class="mir" id="mir" aria-hidden="true"></div>
+      <textarea class="txt" id="wText" lang="pl" spellcheck="true" placeholder="Wpisz albo wklej tutaj swój tekst…"></textarea>
+    </div>
+    <div class="status">
+      <div class="row"><span><span class="dot sp"></span>Орфография:</span> <span id="spSt" class="muted">загружаю словарь…</span></div>
+      <div class="row"><span><span class="dot gr"></span>Грамматика:</span> <span id="grSt" class="muted">…</span> <button class="btn sm ghost hidden" id="grBtn"></button> <button class="btn sm ghost hidden" id="grRetry">Повторить</button></div>
+    </div>
+    <div class="issue hidden" id="issue" aria-live="polite"></div>
     <div class="actions"><button class="btn ghost" id="wClear">Очистить</button></div>
+  </div>
+  <div class="card hidden" id="iCard">
+    <details open><summary>Замечания <span id="iN"></span></summary><ul class="ilist" id="iList"></ul></details>
   </div>
   <div class="card">
     <p class="label">Сколько слов требует задание</p>
@@ -142,7 +136,14 @@ input.num:focus{border-color:var(--ink)}
     <details><summary>Что посчитано как слово <span id="wListN"></span></summary><div class="tokens" id="wList"></div></details>
   </div>
   <div class="card">
-    <h2>Как считают слова</h2>
+    <h2>Как работает проверка</h2>
+    <ul class="list">
+      <li><b>Орфография</b> (красная волна) — словарь Hunspell pl_PL прямо на устройстве, без интернета и без лимитов Claude. Слово проверяется, когда вы его дописали (после пробела или знака препинания).</li>
+      <li><b>Грамматика и пунктуация</b> (синяя волна) — Claude проверяет каждое законченное предложение (после <i>. ! ?</i>). Это расходует лимиты вашего аккаунта Claude, поэтому включается кнопкой. Проверенные предложения запоминаются и повторно не отправляются.</li>
+      <li>Поставьте курсор на подчёркнутое слово — появится объяснение и варианты исправления.</li>
+      <li>Грамматика работает только внутри Claude (артефакт или приложение на компьютере).</li>
+    </ul>
+    <h2 style="margin-top:16px">Как считают слова</h2>
     <ul class="list">
       <li>Считается каждое слово, в том числе предлоги, союзы и частицы из одной-двух букв: <i>w, z, i, a, o, u, się, nie</i>.</li>
       <li>Слово через дефис — одно слово: <i>biało-czerwony, e-mail, PRL-u</i>.</li>
@@ -158,7 +159,7 @@ input.num:focus{border-color:var(--ink)}
       <li>Длина (<i>objętość</i>) входит в критерий «wykonanie zadania (treść, forma, objętość)». Экзаменатор записывает «liczba słów w pracy / liczba wymaganych słów» и процент.</li>
       <li>Допустимое отклонение от указанного количества слов — ±10%, на любом уровне. Слишком короткая работа теряет баллы.</li>
     </ul>
-    <p class="muted" style="font-size:.85rem;margin:10px 0 0">Источники: образцы и экзаменационные листы на <a href="https://certyfikatpolski.pl/" target="_blank" rel="noopener">certyfikatpolski.pl</a>. Сертификационная комиссия не публикует правил подсчёта отдельных слов, поэтому правила выше следуют общепринятой практике польских экзаменов (CKE).</p>
+    <p class="muted" style="font-size:.85rem;margin:10px 0 0">Источники: образцы и экзаменационные листы на <a href="https://certyfikatpolski.pl/" target="_blank" rel="noopener">certyfikatpolski.pl</a>. Сертификационная комиссия не публикует правил подсчёта отдельных слов, поэтому правила выше следуют общепринятой практике польских экзаменов (CKE). Словарь: SJP.PL (GPL/LGPL/MPL).</p>
   </div>
 </section>
 </div>
@@ -167,11 +168,12 @@ input.num:focus{border-color:var(--ink)}
 
 <script>
 const $ = s => document.querySelector(s);
-const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const store = {
   get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},
   set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 };
+const ta = $('#wText'), mir = $('#mir');
 
 /* ---------- польская клавиатура ---------- */
 let lastInput=null;
@@ -179,7 +181,7 @@ $('#kbd').innerHTML='ąćęłńóśźż'.split('').map(c=>`<button type="button"
 document.addEventListener('focusin',e=>{if(e.target.matches('textarea.txt'))lastInput=e.target});
 $('#kbd').addEventListener('pointerdown',e=>{
   const b=e.target.closest('button');if(!b)return;e.preventDefault();
-  const el=lastInput||$('#wText');
+  const el=lastInput||ta;
   const s=el.selectionStart??el.value.length,en=el.selectionEnd??el.value.length;
   el.value=el.value.slice(0,s)+b.dataset.c+el.value.slice(en);
   el.focus();el.setSelectionRange(s+1,s+1);
@@ -187,10 +189,7 @@ $('#kbd').addEventListener('pointerdown',e=>{
 });
 
 /* ---------- СЛОВА: подсчёт слов в тексте ---------- */
-// Слово - любая группа знаков между пробелами, в которой есть буква или цифра.
-// Поэтому "e-mail", "np.", "2024" - одно слово, а "–", "..." - ни одного.
 const words = t => t.split(/\s+/).filter(w=>/[\p{L}\p{N}]/u.test(w));
-// Русское склонение: 1 слово, 2 слова, 5 слов
 const plural = (n,one,few,many) => {const a=n%10,b=n%100;return a===1&&b!==11?one:a>=2&&a<=4&&(b<12||b>14)?few:many};
 const slow = n => n+' '+plural(n,'слово','слова','слов');
 const NEEDS=[25,30,40,100,150,160,170,175,200,260,270];
@@ -199,13 +198,13 @@ function needChips(){
   $('#wNeedChips').innerHTML=NEEDS.map(n=>`<button class="chip${n===W.need?' on':''}" data-n="${n}">${n}</button>`).join('');
 }
 function renderW(){
-  const t=$('#wText').value, ws=words(t), n=ws.length, need=W.need;
+  const t=ta.value, ws=words(t), n=ws.length, need=W.need;
   const chars=t.replace(/\s/g,'').length;
   let html=`<div class="big">${slow(n)}</div><div class="muted">${chars} знаков без пробелов</div>`;
   if(need>0){
     const lo=Math.ceil(need*0.9), hi=Math.floor(need*1.1), pct=Math.round(n*100/need);
     html+=`<div class="muted" style="margin-top:4px">${n} / ${need} — ${pct}%</div>`;
-    if(!n){/* пустой текст: без оценки */}
+    if(!n){}
     else if(n<lo) html+=`<div class="fb diac">Мало: не хватает ${slow(lo-n)} до минимума ${lo} (норма ${lo}–${hi}).</div>`;
     else if(n>hi) html+=`<div class="fb bad">Много: на ${slow(n-hi)} больше максимума ${hi} (норма ${lo}–${hi}).</div>`;
     else html+=`<div class="fb ok">✓ В норме: ${lo}–${hi} слов.</div>`;
@@ -213,21 +212,218 @@ function renderW(){
   $('#wRes').innerHTML=html;
   $('#wListN').textContent=n?'· '+n:'';
   $('#wList').innerHTML=ws.map((w,i)=>`<span><small>${i+1}</small>${esc(w)}</span>`).join('');
+  edUpdate();
 }
-$('#wText').value=store.get('plc-text','');
+ta.value=store.get('plc-text','');
 $('#wNeed').value=W.need;
-$('#wText').addEventListener('input',()=>{store.set('plc-text',$('#wText').value);renderW()});
+ta.addEventListener('input',()=>{store.set('plc-text',ta.value);renderW()});
 $('#wNeed').addEventListener('input',()=>{const v=parseInt($('#wNeed').value,10);W.need=v>0?v:0;store.set('plc-need',W.need);needChips();renderW()});
 $('#wNeedChips').addEventListener('click',e=>{
   const c=e.target.closest('.chip');if(!c)return;
   W.need=+c.dataset.n;$('#wNeed').value=W.need;store.set('plc-need',W.need);needChips();renderW();
 });
-$('#wClear').addEventListener('click',()=>{$('#wText').value='';store.set('plc-text','');renderW();$('#wText').focus()});
+$('#wClear').addEventListener('click',()=>{ta.value='';store.set('plc-text','');renderW();ta.focus()});
 
+/* ---------- ЗЕРКАЛО: подложка под textarea для подсветки ---------- */
+const HL = typeof CSS!=='undefined' && CSS.highlights && typeof Highlight==='function';
+function sizeMirror(){
+  mir.style.width=ta.clientWidth+'px';
+  mir.style.height=ta.clientHeight+'px';
+  mir.scrollTop=ta.scrollTop;
+}
+new ResizeObserver(sizeMirror).observe(ta);
+ta.addEventListener('scroll',()=>{mir.scrollTop=ta.scrollTop});
+let focused=false;
+ta.addEventListener('focus',()=>{focused=true});
+ta.addEventListener('blur',()=>{focused=false;edUpdate()});
+
+/* ---------- ОРФОГРАФИЯ: Hunspell pl_PL в воркере ---------- */
+const SP={ready:false,failed:false,cache:new Map(),asked:new Set(),sugg:new Map(),ign:new Set(store.get('plc-ign',[])),w:null};
+function spFail(msg){
+  SP.failed=true;ta.spellcheck=true;
+  $('#spSt').textContent='словарь не загрузился'+(msg?' ('+msg+')':'')+' — работает проверка браузера, если она включена';
+}
+try{
+  SP.w=new Worker('spell-worker.js');
+  SP.w.onmessage=({data})=>{
+    if(data.type==='ready'){SP.ready=true;ta.spellcheck=false;edUpdate()}
+    else if(data.type==='error'){spFail(data.message)}
+    else if(data.type==='checked'){for(const k in data.res){SP.cache.set(k,data.res[k]);SP.asked.delete(k)}edUpdate()}
+    else if(data.type==='suggested'){SP.sugg.set(data.word,data.list);showIssue()}
+  };
+  SP.w.onerror=e=>{e.preventDefault&&e.preventDefault();spFail(e.message||'')};
+}catch(e){spFail(String(e.message||e))}
+
+// слово → что проверить в словаре; null — не проверяем (числа, адреса и т.п.)
+function spLookups(tok){
+  if(/\p{N}|@|\/|^www\./u.test(tok))return null;
+  const lead=tok.match(/^[^\p{L}]*/u)[0].length, trail=tok.match(/[^\p{L}]*$/u)[0];
+  if(lead>=tok.length)return null;
+  const core=tok.slice(lead,tok.length-trail.length);
+  if(!/\p{L}/u.test(core))return null;
+  const v={core,dot:trail.startsWith('.')?core+'.':null,parts:core.includes('-')?core.split('-').filter(Boolean):[]};
+  v.all=[core,...(v.dot?[v.dot]:[]),...v.parts];v.lead=lead;
+  return v;
+}
+function spState(v){ // true — ок, false — ошибка, null — ещё не знаем
+  if(SP.ign.has(v.core.toLowerCase()))return true;
+  const g=k=>SP.cache.get(k);
+  if(v.all.some(k=>g(k)===undefined))return null;
+  return g(v.core)||(v.dot&&g(v.dot))||(v.parts.length>1&&v.parts.every(p=>g(p)))||false;
+}
+
+/* ---------- ГРАММАТИКА: Claude проверяет законченные предложения ---------- */
+const ABBR=new Set('np itp itd tzn tj ul al pl ok godz min max prof dr mgr inż ks św r w wg zob ds nr tel str s ang pol ros cdn m.in'.split(' '));
+const norm=s=>s.replace(/\s+/g,' ').trim();
+const GR={sample:null,on:store.get('plc-gr-on',false),cache:store.get('plc-gr-cache',{}),inflight:null,failed:new Set(),stop:'',avail:'wait'};
+function sentences(t){
+  const out=[];let start=0;const re=/[.!?…]+["'»”)]*(?=\s|$)/g;let m;
+  while((m=re.exec(t))){
+    const end=m.index+m[0].length;
+    if(m[0]==='.'){const w=t.slice(start,m.index).match(/([\p{L}.]+)$/u);if(w&&ABBR.has(w[1].toLowerCase()))continue;
+      if(w&&/^\p{Lu}$/u.test(w[1]))continue;} // инициал: J. Kowalski
+    const raw=t.slice(start,end), lead=raw.match(/^\s*/)[0].length;
+    if(/\p{L}/u.test(raw))out.push({s:start+lead,e:end,text:raw.slice(lead),key:norm(raw)});
+    start=end;
+  }
+  return out;
+}
+function grPending(t){
+  const c=ta.selectionStart;
+  return sentences(t).filter(x=>!GR.cache[x.key]&&!GR.failed.has(x.key)&&!(focused&&c>=x.s&&c<x.e));
+}
+function grPump(){
+  if(!GR.on||!GR.sample||GR.inflight||GR.stop)return;
+  const batch=[...new Set(grPending(ta.value).map(x=>x.key))].slice(0,6);
+  if(!batch.length)return;
+  const ctl=new AbortController();GR.inflight={keys:batch,ctl};grStatus();
+  const prompt=`You check Polish texts written by a learner preparing for the Polish B1/B2 certificate exam (egzamin certyfikatowy).
+Check each numbered sentence for errors in grammar (cases, agreement, verb forms and aspect, prepositions), word choice, word order and punctuation (especially commas required by Polish rules, e.g. before "że", "który", "ponieważ", "żeby").
+Do NOT report spelling typos that produce non-existent words — they are checked separately. DO report real-word errors (e.g. "morze" instead of "może"). Do not report style preferences when the sentence is correct.
+
+Sentences:
+${batch.map((s,i)=>`${i+1}. ${s}`).join('\n')}
+
+Reply with only a JSON array with one object per sentence that has errors:
+{"i": <sentence number>, "issues": [{"bad": "<exact substring copied from the sentence, as short as possible>", "fix": "<corrected replacement for that substring>", "why": "<short explanation in Russian, at most 15 words>"}]}
+Omit correct sentences. Reply [] if all are correct.
+Example: [{"i":2,"issues":[{"bad":"z moja siostra","fix":"z moją siostrą","why":"После «z» в значении «с кем» нужен творительный падеж"}]}]`;
+  GR.sample.json(prompt,{modelTier:'quick',signal:ctl.signal}).then(res=>{
+    const by={};
+    if(Array.isArray(res))for(const r of res){
+      const i=Number(r&&r.i)-1;if(!(i>=0&&i<batch.length)||!Array.isArray(r.issues))continue;
+      by[i]=r.issues.filter(x=>x&&typeof x.bad==='string'&&x.bad.trim()).slice(0,8)
+        .map(x=>({bad:String(x.bad),fix:String(x.fix??''),why:String(x.why??'')}));
+    }
+    batch.forEach((k,i)=>{GR.cache[k]=by[i]||[]});
+    const keys=Object.keys(GR.cache);if(keys.length>400)for(const k of keys.slice(0,keys.length-400))delete GR.cache[k];
+    store.set('plc-gr-cache',GR.cache);
+  }).catch(e=>{
+    const c=e&&e.code;
+    if(c==='cancelled')return;
+    if(['not_granted','sampling_disabled','not_declared','capability_disabled','capability_removed'].includes(c)){GR.avail='no';GR.stop='Claude недоступен для этой страницы'+(c==='not_granted'?' (доступ не разрешён)':'');}
+    else if(c==='rate_limited'){GR.stop=e.reason==='usage_limit'?'исчерпан лимит Claude — попробуйте позже':'слишком много запросов — подождите и нажмите «Повторить»'}
+    else if(c==='session_expired'){GR.stop='нужно заново войти в Claude'}
+    else{batch.forEach(k=>GR.failed.add(k))}
+  }).finally(()=>{GR.inflight=null;edUpdate()});
+}
+function grStatus(){
+  const st=$('#grSt'),btn=$('#grBtn'),rt=$('#grRetry');
+  btn.classList.add('hidden');rt.classList.add('hidden');
+  if(GR.avail==='wait'){st.textContent='проверяю, доступен ли Claude…';return}
+  if(GR.avail==='no'&&!GR.stop){st.textContent='доступна только внутри Claude (артефакт или приложение)';return}
+  if(GR.stop){st.textContent=GR.stop;if(GR.avail!=='no')rt.classList.remove('hidden');return}
+  if(!GR.on){st.textContent='выключена — расходует лимиты Claude';btn.textContent='Включить';btn.classList.remove('hidden');return}
+  const ss=sentences(ta.value), done=ss.filter(x=>GR.cache[x.key]).length, fail=ss.filter(x=>GR.failed.has(x.key)&&!GR.cache[x.key]).length;
+  let s=ss.length?`проверено ${done} из ${ss.length} предложений`:'ждёт первого законченного предложения';
+  if(GR.inflight)s+=' · проверяю…';
+  if(fail){s+=` · ${fail} не удалось`;rt.classList.remove('hidden')}
+  st.textContent=s;btn.textContent='Выключить';btn.classList.remove('hidden');
+}
+$('#grBtn').addEventListener('click',()=>{GR.on=!GR.on;store.set('plc-gr-on',GR.on);if(!GR.on&&GR.inflight)GR.inflight.ctl.abort();edUpdate()});
+$('#grRetry').addEventListener('click',()=>{GR.failed.clear();GR.stop='';edUpdate()});
+
+/* ---------- сбор замечаний и подсветка ---------- */
+let ISS=[];
+function collect(t){
+  const out=[], need=[];
+  const c=ta.selectionStart, re=/\S+/g;let m;
+  if(SP.ready)while((m=re.exec(t))){
+    const s=m.index,e=s+m[0].length;
+    if(focused&&c===e&&(e===t.length||!/\s/.test(t[e]||'')))continue; // слово ещё пишется
+    const v=spLookups(m[0]);if(!v)continue;
+    const st=spState(v);
+    if(st===null){for(const k of v.all)if(!SP.cache.has(k)&&!SP.asked.has(k)){SP.asked.add(k);need.push(k)}continue}
+    if(!st){const cs=s+v.lead;out.push({k:'sp',s:cs,e:cs+v.core.length,word:v.core})}
+  }
+  if(need.length)SP.w.postMessage({type:'check',words:need});
+  for(const x of sentences(t)){
+    const iss=GR.cache[x.key];if(!iss)continue;
+    for(const g of iss){
+      let i=x.text.indexOf(g.bad);if(i<0)i=x.text.toLowerCase().indexOf(g.bad.toLowerCase());
+      out.push(i<0?{k:'gr',s:x.s,e:x.e,g,whole:true}:{k:'gr',s:x.s+i,e:x.s+i+g.bad.length,g});
+    }
+  }
+  return out.sort((a,b)=>a.s-b.s);
+}
+function paint(t){
+  mir.textContent=t+' ';sizeMirror();
+  if(!HL)return;
+  const node=mir.firstChild, mk=list=>new Highlight(...list.map(x=>{const r=new Range();r.setStart(node,x.s);r.setEnd(node,x.e);return r}));
+  CSS.highlights.set('sp',mk(ISS.filter(x=>x.k==='sp')));
+  CSS.highlights.set('gr',mk(ISS.filter(x=>x.k==='gr'&&!x.whole)));
+  const cur=issueAt();CSS.highlights.set('cur',mk(cur?[cur]:[]));
+}
+function edUpdate(){
+  const t=ta.value;
+  ISS=collect(t);paint(t);
+  if(SP.ready){const n=ISS.filter(x=>x.k==='sp').length;$('#spSt').textContent=n?`${n} ${plural(n,'слово','слова','слов')} не найдено в словаре`:'ошибок не найдено';}
+  grStatus();renderList();showIssue();grPump();
+}
+function issueAt(){
+  const c=ta.selectionStart,d=ta.selectionEnd;
+  return ISS.find(x=>!x.whole&&c>=x.s&&d<=x.e&&c<=x.e)||null;
+}
+function renderList(){
+  $('#iCard').classList.toggle('hidden',!ISS.length);
+  $('#iN').textContent=ISS.length?'· '+ISS.length:'';
+  $('#iList').innerHTML=ISS.map((x,i)=>x.k==='sp'
+    ?`<li data-i="${i}"><span class="k sp">○</span> <b>${esc(x.word)}</b> <span class="why">— нет в словаре</span></li>`
+    :`<li data-i="${i}"><span class="k gr">○</span> <span class="strike">${esc(x.g.bad)}</span> → <b>${esc(x.g.fix)}</b> <span class="why">— ${esc(x.g.why)}</span></li>`).join('');
+}
+$('#iList').addEventListener('click',e=>{
+  const li=e.target.closest('li');if(!li)return;const x=ISS[+li.dataset.i];if(!x)return;
+  ta.focus();ta.setSelectionRange(x.s,x.e);edUpdate();
+});
+function showIssue(){
+  const box=$('#issue'),x=issueAt();
+  if(!x){box.classList.add('hidden');box.replaceChildren();return}
+  box.classList.remove('hidden');box.replaceChildren();
+  const what=document.createElement('div'),why=document.createElement('div'),ch=document.createElement('div');
+  what.className='what';why.className='why';ch.className='chips';
+  const btn=(label,fn,on)=>{const b=document.createElement('button');b.type='button';b.className='chip'+(on?' on':'');b.textContent=label;b.addEventListener('mousedown',e=>e.preventDefault());b.addEventListener('click',fn);ch.append(b)};
+  if(x.k==='sp'){
+    what.textContent='Орфография: «'+x.word+'»';
+    const sg=SP.sugg.get(x.word);
+    if(!sg){why.textContent='Ищу варианты…';SP.w.postMessage({type:'suggest',word:x.word})}
+    else{why.textContent=sg.length?'Возможно, вы имели в виду:':'Вариантов нет.';sg.forEach(w=>btn(w,()=>replace(x,w),true))}
+    btn('Пропустить слово',()=>{SP.ign.add(x.word.toLowerCase());store.set('plc-ign',[...SP.ign]);edUpdate()});
+  }else{
+    what.textContent='Грамматика: «'+x.g.bad+'» → «'+x.g.fix+'»';
+    why.textContent=x.g.why;
+    if(x.g.fix)btn('Исправить',()=>replace(x,x.g.fix),true);
+  }
+  box.append(what,why,ch);
+}
+function replace(x,w){
+  ta.focus();ta.setSelectionRange(x.s,x.e);
+  if(!document.execCommand||!document.execCommand('insertText',false,w)){ta.setRangeText(w,x.s,x.e,'end');ta.dispatchEvent(new Event('input',{bubbles:true}))}
+}
+['click','keyup','select'].forEach(ev=>ta.addEventListener(ev,()=>{paint(ta.value);showIssue()}));
 
 needChips();renderW();
 
-/* ---------- приложение для компьютера (Claude Desktop) ---------- */
+/* ---------- Claude: грамматика и приложение для компьютера ---------- */
 function appIcon(){
   const c=document.createElement('canvas');c.width=c.height=256;const x=c.getContext('2d');
   x.fillStyle='#c8102e';x.fillRect(0,0,256,256);
@@ -237,8 +433,9 @@ function appIcon(){
   return c.toDataURL('image/png');
 }
 (async()=>{
+  if(!window.claude||typeof claude.use!=='function'){GR.avail='no';grStatus();return}
+  claude.use('sample').then(s=>{GR.sample=s||null;GR.avail=s?'yes':'no';edUpdate()}).catch(()=>{GR.avail='no';grStatus()});
   try{
-    if(!window.claude||typeof claude.use!=='function')return;
     const d=await claude.use('desktop');if(!d)return;
     if(d.window){d.app.dock.setIcon(appIcon()).catch(()=>{});return}
     if((await d.install.state())==='available'){
