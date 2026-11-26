@@ -383,11 +383,17 @@ function okMistB(cur){const k=bKey(cur);if(!MISTB[k]&&!DONE.words[k]){DONE.words
 function updErr(){const n=Object.keys(MIST).length+Object.keys(MISTB).length;$('#errCount').textContent=n?'· '+n:''}
 
 /* ---------- проверка ---------- */
-function judge(user, verb, p){
+// sieFirst: пропуск не в начале предложения, поэтому się можно поставить и перед глаголом
+function judge(user, verb, p, sieFirst){
   const u=norm(user), c=norm(verb.f[p]);
   if(!u) return {r:'empty'};
   if(u===c) return {r:'ok'};
   if(strip(u)===strip(c)) return {r:'diac'};
+  if(sieFirst && sie(verb.inf)){
+    const alt='się '+verb.f[p].replace(/ się$/,''), a=norm(alt);
+    if(u===a) return {r:'ok',form:alt};
+    if(strip(u)===strip(a)) return {r:'diac',form:alt};
+  }
   if(sie(verb.inf) && u+' się'===c) return {r:'sie'};
   let idx=verb.f.findIndex(f=>norm(f)===u);
   if(idx<0) idx=verb.f.findIndex(f=>strip(norm(f))===strip(u));
@@ -402,7 +408,7 @@ function hintHTML(verb,p){
   return `<div class="fb hint"><b>Лицо:</b> ${P[p]}${p===2?' (pan/pani → как on/ona)':''}<br><b>Группа ${esc(g.name)}</b> — для «${P[p]}» окончание <span class="end">${g.ends[p]}</span><br><span class="muted">${g.rule}</span></div>`;
 }
 function fbHTML(res,verb,p,user){
-  const right=`<b class="ink">${esc(verb.f[p])}</b>`;
+  const right=`<b class="ink">${esc(res.form||verb.f[p])}</b>`;
   const tbl=conjTable(verb,p,res.idx);
   const grp=`<div class="muted" style="margin-top:6px">${esc(G[verb.g].name)}: ${G[verb.g].ends.join(', ')}</div>`;
   switch(res.r){
@@ -499,10 +505,14 @@ function renderS(){
 function checkS(show){
   const c=curS(),ins=[...$('#sText').querySelectorAll('input')];
   const first=!S.checked;let allOk=true,firstOk=!show,fb='';
+  const parts=c.t.split('___');
   ins.forEach((inp,k)=>{
     const v=c.verbs[k],p=c.ps[k];
     if(inp.readOnly){if(inp.classList.contains('ok'))fb+=`<div class="fb ok">✓ <b>${esc(v.f[p])}</b></div>`;return}
-    let res=show?{r:'show'}:judge(inp.value,v,p);
+    // Текст перед пропуском без подсказки в скобках: пусто или конец предложения - пропуск в начале
+    const before=parts.slice(0,k+1).join('x').replace(/\([^)]*\)/g,'').trim();
+    const sieFirst=before!==''&&!/[.!?]$/.test(before);
+    let res=show?{r:'show'}:judge(inp.value,v,p,sieFirst);
     if(res.r==='empty')res={r:'bad'};
     if(show)inp.value=v.f[p];
     const good=res.r==='ok';
@@ -510,7 +520,7 @@ function checkS(show){
     if(good||show)inp.readOnly=true;else allOk=false;
     if(!good)firstOk=false;
     if(first){if(good)okMist(v.inf,p);else addMist(v.inf,p);logResult('zdania',v.inf,p,inp.value,res.r)}
-    fb+=(!first&&good)?`<div class="fb ok">✓ Теперь верно: <b>${esc(v.f[p])}</b></div>`:fbHTML(res,v,p,inp.value);
+    fb+=(!first&&good)?`<div class="fb ok">✓ Теперь верно: <b>${esc(res.form||v.f[p])}</b></div>`:fbHTML(res,v,p,inp.value);
   });
   if(first){S.checked=true;S.done++;const sk=S.queue[S.i].key;if(firstOk){S.ok++;DONE.sent[sk]=1}else{S.wrong.push(S.queue[S.i]);delete DONE.sent[sk]}saveDone();setChips();updSetProgress()}
   S.solved=allOk;
@@ -981,8 +991,8 @@ function renderRef(){
   if(R.sec==='how'){
     body=`<h2>Как выбрать форму</h2><ol class="list">
      <li><b>Лицо:</b> местоимение в скобках или подлежащее (Marek = on, dwa samochody = one, pan/pani = on/ona).</li>
-     <li><b>Группа:</b> по инфинитиву — -ować → A, -ać → B, -ić/-yć/-eć → C. Но pisać, dawać → D; woleć → C; rozumieć → особые.</li>
-     <li><b>Форма:</b> основа + окончание. <i>się</i> стоит после глагола.</li></ol>`;
+     <li><b>Группа:</b> по инфинитиву — -ować → A, -ać → B, -ić/-yć/-eć → C. Исключения: pisać, brać, jechać, dawać, wstawać, sprzedawać, pić, myć, żyć, chcieć, móc, iść → D; spać → C; być, mieć, jeść, wiedzieć, rozumieć, umieć → особые.</li>
+     <li><b>Форма:</b> основа + окончание. <i>się</i> стоит после глагола или перед ним (<i>Czym ona się interesuje?</i>), но не в начале предложения: <i>Interesuję się historią.</i></li></ol>`;
   }else{
     const g=G[R.sec],vs=VERBS.filter(v=>v.g===R.sec);
     const cur=V[R.verb[R.sec]]&&V[R.verb[R.sec]].g===R.sec?V[R.verb[R.sec]]:vs[0];
